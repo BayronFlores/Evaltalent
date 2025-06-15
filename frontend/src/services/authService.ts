@@ -1,5 +1,6 @@
 // src/services/authService.ts
-import type { LoginForm, User } from '../types';
+import type { User } from '../types/UserType';
+import type { LoginForm } from '../types/FormType';
 
 // Datos de usuario mock
 const mockUser: User = {

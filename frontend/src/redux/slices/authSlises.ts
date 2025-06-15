@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { User, LoginForm } from '../../types';
+import type { User } from '../../types/UserType';
+import type { LoginForm } from '../../types/FormType';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 

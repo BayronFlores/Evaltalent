@@ -7,7 +7,7 @@ import { authService } from './services/authService';
 
 // Import pages
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
 import EvaluationsPage from './pages/EvaluationsPage';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';

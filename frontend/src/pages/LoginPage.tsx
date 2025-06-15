@@ -6,7 +6,7 @@ import { BarChart3, Eye, EyeOff, Mail, Lock, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { AppDispatch, RootState } from '../redux/store';
-import type { LoginForm } from '../types';
+import type { LoginForm } from '../types/FormType';
 
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

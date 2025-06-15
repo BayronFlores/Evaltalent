@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
-import { UserRole } from '../../types';
+import { UserRole } from '../../types/UserType';
 import {
   BarChart3,
   Users,
