@@ -1,5 +1,26 @@
 // src/services/userService.ts
-import { apiClient } from './apiClient';
+const API_BASE_URL = 'http://localhost:5000/api';
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  department?: string;
+  position?: string;
+  role: string;
+  roleId: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  description?: string;
+}
 
 export interface CreateUserData {
   username: string;
@@ -10,101 +31,127 @@ export interface CreateUserData {
   roleId: number;
   department?: string;
   position?: string;
-  managerId?: number;
 }
 
 export interface UpdateUserData {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  department?: string;
-  position?: string;
-  roleId?: number;
-  managerId?: number;
-}
-
-export interface UserResponse {
-  id: number;
   username: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  roleId: number;
   department?: string;
   position?: string;
-  managerId?: number;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+};
+
 export const userService = {
-  // Get all users (admin only)
-  getAllUsers: async (): Promise<UserResponse[]> => {
-    const response = await apiClient.request('/users');
-    if (!response.ok) {
-      throw new Error('Failed to fetch users');
+  // Obtener todos los usuarios
+  getUsers: async (): Promise<User[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener usuarios');
+      }
+
+      const data = await response.json();
+      return data.users;
+    } catch (error) {
+      console.error('❌ Get users error:', error);
+      throw error;
     }
-    return response.json();
   },
 
-  // Get user by ID
-  getUserById: async (id: number): Promise<UserResponse> => {
-    const response = await apiClient.request(`/users/${id}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch user');
+  // Obtener todos los roles
+  getRoles: async (): Promise<Role[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/roles`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener roles');
+      }
+
+      const data = await response.json();
+      return data.roles;
+    } catch (error) {
+      console.error('❌ Get roles error:', error);
+      throw error;
     }
-    return response.json();
   },
 
-  // Create new user (admin only)
-  createUser: async (userData: CreateUserData): Promise<UserResponse> => {
-    const response = await apiClient.request('/users', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to create user');
+  // Crear usuario
+  createUser: async (userData: CreateUserData): Promise<User> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al crear usuario');
+      }
+
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      console.error('❌ Create user error:', error);
+      throw error;
     }
-    return response.json();
   },
 
-  // Update user
-  updateUser: async (
-    id: number,
-    userData: UpdateUserData,
-  ): Promise<UserResponse> => {
-    const response = await apiClient.request(`/users/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(userData),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update user');
+  // Actualizar usuario
+  updateUser: async (id: number, userData: UpdateUserData): Promise<User> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al actualizar usuario');
+      }
+
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      console.error('❌ Update user error:', error);
+      throw error;
     }
-    return response.json();
   },
 
-  // Delete user (admin only)
+  // Eliminar usuario
   deleteUser: async (id: number): Promise<void> => {
-    const response = await apiClient.request(`/users/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to delete user');
-    }
-  },
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
 
-  // Get roles
-  getRoles: async (): Promise<
-    Array<{ id: number; name: string; description: string }>
-  > => {
-    const response = await apiClient.request('/users/roles');
-    if (!response.ok) {
-      throw new Error('Failed to fetch roles');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al eliminar usuario');
+      }
+    } catch (error) {
+      console.error('❌ Delete user error:', error);
+      throw error;
     }
-    return response.json();
   },
 };
