@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState, AppDispatch } from '../../redux/store';
@@ -24,10 +24,43 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
+  // Refs for click outside detection
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force navigation even if logout fails
+      navigate('/login');
+    }
   };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowUserMenu(false);
+      }
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Mock notifications
   const notifications = [
@@ -84,7 +117,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         {/* Right side */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <div className="relative">
+          <div className="relative" ref={notificationsRef}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className="p-2 rounded-full hover:bg-[#f1f5f9] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] relative"
@@ -139,7 +172,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </div>
 
           {/* User menu */}
-          <div className="relative">
+          <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-[#f1f5f9] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]"

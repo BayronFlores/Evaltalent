@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Evaluation } from '../../types/EvaluationType'; // Ajusta la ruta según tu estructura
+import type { Evaluation } from '../../types/EvaluationType';
 
 const RecentEvaluations: React.FC = () => {
   // Ejemplo de uso de las interfaces

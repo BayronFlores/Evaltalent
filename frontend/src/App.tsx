@@ -2,8 +2,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from './redux/store';
-import { getCurrentUser } from './redux/slices/authSlises';
-import { authService } from './services/authService';
+import { initializeAuth } from './redux/slices/authSlises';
 
 // Import pages
 import LoginPage from './pages/LoginPage';
@@ -21,12 +20,17 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isAuthenticated, loading } = useSelector(
+  const { isAuthenticated, loading, initialized } = useSelector(
     (state: RootState) => state.auth,
   );
 
-  if (loading) {
-    return <LoadingSpinner />;
+  // Show loading while initializing auth
+  if (!initialized || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
@@ -34,7 +38,18 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
 // Public Route Component (redirect if authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, initialized, loading } = useSelector(
+    (state: RootState) => state.auth,
+  );
+
+  // Show loading while initializing auth
+  if (!initialized || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return !isAuthenticated ? (
     <>{children}</>
@@ -45,16 +60,14 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, loading } = useSelector(
-    (state: RootState) => state.auth,
-  );
+  const { initialized } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    // Verificar si hay una sesión activa al cargar la aplicación
-    if (authService.isAuthenticated() && !isAuthenticated && !loading) {
-      dispatch(getCurrentUser());
+    // Initialize authentication state on app load
+    if (!initialized) {
+      dispatch(initializeAuth());
     }
-  }, [dispatch, isAuthenticated, loading]);
+  }, [dispatch, initialized]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">

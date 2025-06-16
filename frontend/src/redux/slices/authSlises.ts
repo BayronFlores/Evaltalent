@@ -11,15 +11,17 @@ interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  initialized: boolean; // Para saber si ya verificamos el estado inicial
 }
 
-// Inicializar sin localStorage
+// Inicializar estado
 const initialState: AuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
   loading: false,
   error: null,
+  initialized: false,
 };
 
 // Async thunks
@@ -52,6 +54,49 @@ export const logout = createAsyncThunk('auth/logout', async () => {
   return null;
 });
 
+// Thunk para inicializar el estado de autenticación al cargar la app
+export const initializeAuth = createAsyncThunk(
+  'auth/initialize',
+  async (_, { rejectWithValue }) => {
+    try {
+      if (authService.isAuthenticated()) {
+        const user = await authService.getCurrentUser();
+        return user;
+      }
+      return null;
+    } catch (error: any) {
+      // Si falla, limpiar tokens
+      await authService.logout();
+      return null;
+    }
+  },
+);
+
+// Thunk para registro de usuarios (admin only)
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (
+    userData: {
+      username: string;
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      roleId: number;
+      department?: string;
+      position?: string;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      await authService.register(userData);
+      return { message: 'User registered successfully' };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Registration failed');
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -66,6 +111,7 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+      state.error = null;
     },
     // Acción para limpiar el estado completo
     resetAuth: (state) => {
@@ -74,10 +120,37 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
+      state.initialized = false;
+    },
+    // Marcar como inicializado
+    setInitialized: (state) => {
+      state.initialized = true;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Initialize auth cases
+      .addCase(initializeAuth.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(initializeAuth.fulfilled, (state, action) => {
+        state.loading = false;
+        state.initialized = true;
+        if (action.payload) {
+          state.user = action.payload;
+          state.isAuthenticated = true;
+        } else {
+          state.user = null;
+          state.isAuthenticated = false;
+        }
+      })
+      .addCase(initializeAuth.rejected, (state) => {
+        state.loading = false;
+        state.initialized = true;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
+      })
       // Login cases
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -89,6 +162,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
+        state.initialized = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -118,9 +192,23 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
+      })
+      // Register user cases
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { clearError, setCredentials, resetAuth } = authSlice.actions;
+export const { clearError, setCredentials, resetAuth, setInitialized } =
+  authSlice.actions;
 export default authSlice.reducer;

@@ -34,12 +34,16 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginForm) => {
     dispatch(clearError());
     try {
+      console.log('🔄 Submitting login form:', data);
       const result = await dispatch(login(data));
+      console.log('📡 Login result:', result);
+
       if (login.fulfilled.match(result)) {
+        console.log('✅ Login successful, navigating to dashboard');
         navigate('/dashboard');
       }
     } catch (error) {
-      // El error se maneja en el slice
+      console.error('❌ Login form error:', error);
     }
   };
 
@@ -50,16 +54,11 @@ const LoginPage: React.FC = () => {
     setShowCredentials(false);
   };
 
-  // Credenciales de ejemplo
+  // Credenciales actualizadas que coinciden con el backend
   const exampleCredentials = [
-    { role: 'Administrador', email: 'admin@example.com', password: 'admin123' },
-    { role: 'Manager', email: 'manager@example.com', password: 'manager123' },
-    {
-      role: 'Empleado',
-      email: 'employee@example.com',
-      password: 'employee123',
-    },
-    { role: 'Demo', email: 'demo@example.com', password: 'demo123' },
+    { role: 'Administrador', email: 'admin', password: 'admin123' },
+    { role: 'Manager', email: 'manager', password: 'manager123' },
+    { role: 'Empleado', email: 'employee', password: 'employee123' },
   ];
 
   return (
@@ -104,7 +103,13 @@ const LoginPage: React.FC = () => {
                           {cred.role}:
                         </span>
                         <br />
-                        <span className="text-blue-600">{cred.email}</span>
+                        <span className="text-blue-600">
+                          Usuario: {cred.email}
+                        </span>
+                        <br />
+                        <span className="text-blue-600">
+                          Contraseña: {cred.password}
+                        </span>
                       </div>
                       <button
                         type="button"
@@ -132,7 +137,7 @@ const LoginPage: React.FC = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-[#334155] mb-2"
               >
-                Correo electrónico
+                Usuario o Correo electrónico
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -140,15 +145,11 @@ const LoginPage: React.FC = () => {
                 </div>
                 <input
                   {...register('email', {
-                    required: 'El correo electrónico es requerido',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Correo electrónico inválido',
-                    },
+                    required: 'El usuario o correo electrónico es requerido',
                   })}
-                  type="email"
+                  type="text"
                   className="w-full px-3 py-2 pl-10 border border-[#d1d5db] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0284c7] focus:border-transparent"
-                  placeholder="tu@example.com"
+                  placeholder="admin o admin@evaltalent.com"
                 />
               </div>
               {errors.email && (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { User } from '../types/UserType'; // Ajusta la ruta según tu estructura
-import { authService } from '../services/authService'; // Ajusta la ruta según tu estructura
+import type { User } from '../types/UserType';
+import { authService } from '../services/authService';
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
