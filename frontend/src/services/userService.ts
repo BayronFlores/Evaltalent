@@ -1,48 +1,11 @@
 // src/services/userService.ts
 const API_BASE_URL = 'http://localhost:5000/api';
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  department?: string;
-  position?: string;
-  role: string;
-  roleId: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-export interface Role {
-  id: number;
-  name: string;
-  description?: string;
-}
-
-export interface CreateUserData {
-  username: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  roleId: number;
-  department?: string;
-  position?: string;
-}
-
-export interface UpdateUserData {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  roleId: number;
-  department?: string;
-  position?: string;
-  isActive: boolean;
-}
+import type {
+  User,
+  Role,
+  CreateUserData,
+  UpdateUserData,
+} from '../types/UserType';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('authToken');
