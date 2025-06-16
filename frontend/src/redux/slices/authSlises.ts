@@ -57,7 +57,8 @@ export const logout = createAsyncThunk('auth/logout', async () => {
 // Thunk para inicializar el estado de autenticación al cargar la app
 export const initializeAuth = createAsyncThunk(
   'auth/initialize',
-  async (_, { rejectWithValue }) => {
+  // async (_, { rejectWithValue }) => {
+  async () => {
     try {
       if (authService.isAuthenticated()) {
         const user = await authService.getCurrentUser();

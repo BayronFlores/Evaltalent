@@ -1,5 +1,5 @@
 // src/services/authService.ts
-import type { User } from '../types/UserType';
+import type { User, UserRole } from '../types/UserType';
 import type { LoginForm } from '../types/FormType';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -14,9 +14,12 @@ interface LoginResponse {
     email: string;
     firstName: string;
     lastName: string;
+    role: string;
     department: string;
     position: string;
-    role: string;
+    createdAt: string;
+    updatedAt: string;
+    managerId?: number | null;
   };
 }
 
@@ -35,21 +38,25 @@ interface UserResponse {
 }
 
 // Función para mapear usuario del backend al tipo User del frontend
-const mapBackendUserToUser = (backendUser: LoginResponse['user']): User => {
+const mapBackendUserToUser = (
+  backendUser: Partial<LoginResponse['user']>,
+): User => {
   return {
-    id: backendUser.id.toString(),
-    email: backendUser.email,
-    firstName: backendUser.firstName,
-    lastName: backendUser.lastName,
-    role: backendUser.role as 'admin' | 'manager' | 'employee',
-    department: backendUser.department,
-    position: backendUser.position,
-    managerId: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    id: backendUser.id!,
+    username: backendUser.username!,
+    email: backendUser.email!,
+    firstName: backendUser.firstName!,
+    lastName: backendUser.lastName!,
+    role: backendUser.role as UserRole,
+    roleId: 0, // o el real si lo tienes
+    department: backendUser.department ?? '',
+    position: backendUser.position ?? '',
+    isActive: true, // o usa backendUser.isActive si viene
+    createdAt: backendUser.createdAt ?? new Date().toISOString(),
+    updatedAt: backendUser.updatedAt ?? new Date().toISOString(),
+    managerId: backendUser.managerId ?? null,
   };
 };
-
 // Gestión de tokens
 const tokenManager = {
   setToken(token: string) {
@@ -125,6 +132,37 @@ export const authService = {
       };
     } catch (error) {
       console.error('❌ Login service error:', error);
+      throw error;
+    }
+  },
+
+  register: async (userData: {
+    username: string;
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    roleId: number;
+    department?: string;
+    position?: string;
+  }): Promise<void> => {
+    try {
+      const token = tokenManager.getToken();
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al registrar usuario');
+      }
+    } catch (error) {
+      console.error('❌ Register service error:', error);
       throw error;
     }
   },

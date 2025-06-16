@@ -4,11 +4,15 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  role: UserRole;
   roleId: number;
   department?: string;
   position?: string;
   isActive: boolean;
+
+  createdAt: string; // o Date si lo estás manejando como objeto Date
+  updatedAt: string;
+  managerId?: number | null; // Opcional y puede ser null
 }
 
 export const UserRole = {
