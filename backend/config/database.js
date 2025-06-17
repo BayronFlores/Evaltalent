@@ -2,20 +2,21 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'evaltalent',
-  user: process.env.DB_USER || 'evaltalent',
-  password: process.env.DB_PASSWORD || 'evaltalent123',
 });
 
-// Probar conexión al inicializar
+// Test de conexión inicial
 pool.on('connect', () => {
   console.log('✅ Conectado a PostgreSQL');
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Error en PostgreSQL:', err);
+  console.error('❌ Error inesperado en PostgreSQL:', err);
+  process.exit(-1);
 });
 
 module.exports = pool;

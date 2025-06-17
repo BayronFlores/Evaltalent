@@ -1,6 +1,7 @@
 // src/services/authService.ts
 import type { User, UserRole } from '../types/UserType';
 import type { LoginForm } from '../types/FormType';
+import { tokenManager } from './tokenManager';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -56,38 +57,6 @@ const mapBackendUserToUser = (
     updatedAt: backendUser.updatedAt ?? new Date().toISOString(),
     managerId: backendUser.managerId ?? null,
   };
-};
-// Gestión de tokens
-const tokenManager = {
-  setToken(token: string) {
-    localStorage.setItem('authToken', token);
-  },
-
-  getToken(): string | null {
-    return localStorage.getItem('authToken');
-  },
-
-  removeToken() {
-    localStorage.removeItem('authToken');
-  },
-
-  setUser(user: User) {
-    localStorage.setItem('currentUser', JSON.stringify(user));
-  },
-
-  getUser(): User | null {
-    const userStr = localStorage.getItem('currentUser');
-    return userStr ? JSON.parse(userStr) : null;
-  },
-
-  removeUser() {
-    localStorage.removeItem('currentUser');
-  },
-
-  clear() {
-    this.removeToken();
-    this.removeUser();
-  },
 };
 
 export const authService = {

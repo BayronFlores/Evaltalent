@@ -8,10 +8,23 @@ const RolesPage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchRoles = async () => {
-    const data = await getRoles();
-    setRoles(data);
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getRoles();
+      setRoles(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      // Agregado el tipo 'any' para el error
+      console.error('Error fetching roles:', error);
+      setError(error.message || 'Error al cargar los roles'); // Muestra el mensaje del backend
+      setRoles([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -25,8 +38,14 @@ const RolesPage: React.FC = () => {
 
   const handleDelete = async (roleId: number) => {
     if (window.confirm('¿Seguro que quieres eliminar este rol?')) {
-      await deleteRole(roleId);
-      fetchRoles();
+      try {
+        await deleteRole(roleId);
+        await fetchRoles();
+      } catch (error: any) {
+        // Agregado el tipo 'any' para el error
+        console.error('Error deleting role:', error);
+        setError(error.message || 'Error al eliminar el rol'); // Muestra el mensaje del backend
+      }
     }
   };
 
@@ -35,11 +54,21 @@ const RolesPage: React.FC = () => {
     setOpenModal(true);
   };
 
+  if (loading) {
+    return <div className="p-6">Cargando roles...</div>;
+  }
+
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">
         Gestión de Roles
       </h2>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
 
       <Button
         variant="contained"
@@ -60,28 +89,36 @@ const RolesPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {roles.map((role) => (
-              <tr key={role.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b">{role.name}</td>
-                <td className="px-4 py-2 border-b">{role.description}</td>
-                <td className="px-4 py-2 border-b space-x-2">
-                  <Button
-                    onClick={() => handleEdit(role)}
-                    variant="outlined"
-                    color="primary"
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(role.id)}
-                    variant="outlined"
-                    color="secondary"
-                  >
-                    Eliminar
-                  </Button>
+            {roles.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                  No hay roles disponibles
                 </td>
               </tr>
-            ))}
+            ) : (
+              roles.map((role) => (
+                <tr key={role.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">{role.name}</td>
+                  <td className="px-4 py-2 border-b">{role.description}</td>
+                  <td className="px-4 py-2 border-b space-x-2">
+                    <Button
+                      onClick={() => handleEdit(role)}
+                      variant="outlined"
+                      color="primary"
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(role.id)}
+                      variant="outlined"
+                      color="secondary"
+                    >
+                      Eliminar
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

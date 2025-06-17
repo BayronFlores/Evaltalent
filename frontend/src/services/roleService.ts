@@ -1,37 +1,90 @@
-import { apiClient } from './apiClient';
+// services/roleService.ts
+const API_BASE_URL = 'http://localhost:5000/api';
 
-// Puedes definir tipos más precisos según tu backend
-interface RoleData {
-  name: string;
-  permissions: number[];
-}
+import { tokenManager } from './tokenManager';
 
-export const getRoles = async (): Promise<any> => {
-  const res = await apiClient.get('/roles');
-  return res;
+const getToken = () => tokenManager.getToken();
+
+// Función helper para manejar respuestas
+const handleResponse = async (response: Response) => {
+  if (!response.ok) {
+    const errorText = await response.json(); // Cambiado a .json() para leer el mensaje del backend
+    throw new Error(
+      `HTTP ${response.status}: ${errorText.message || 'Error desconocido'}`,
+    );
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return response.json();
+  } else {
+    throw new Error('Response is not JSON');
+  }
 };
 
-export const getPermissions = async (): Promise<any> => {
-  const res = await apiClient.get('/roles/permissions');
-  return res;
+// Función helper para hacer requests con token
+const makeRequest = async (url: string, options: RequestInit = {}) => {
+  const token = getToken();
+
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+  });
+
+  return handleResponse(response);
 };
 
-export const createRole = async (data: RoleData): Promise<any> => {
-  const res = await apiClient.post('/roles', data);
-  return res;
+export const getRoles = async () => {
+  try {
+    return await makeRequest('/roles');
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    throw error; // Re-lanza el error para que RolesPage lo capture
+  }
 };
 
-export const updateRole = async (id: number, data: RoleData): Promise<any> => {
-  const res = await apiClient.put(`/roles/${id}`, data);
-  return res;
+export const getPermissions = async () => {
+  try {
+    return await makeRequest('/roles/permissions');
+  } catch (error) {
+    console.error('Error fetching permissions:', error);
+    throw error; // Re-lanza el error para que RoleModal lo capture
+  }
 };
 
-export const deleteRole = async (id: number): Promise<any> => {
-  const res = await apiClient.delete(`/roles/${id}`);
-  return res;
+export const getRolePermissions = async (roleId: number) => {
+  try {
+    return await makeRequest(`/roles/${roleId}/permissions`);
+  } catch (error) {
+    console.error('Error fetching role permissions:', error);
+    throw error; // Re-lanza el error
+  }
 };
 
-export const getRolePermissions = async (id: number): Promise<any> => {
-  const res = await apiClient.get(`/roles/${id}/permissions`);
-  return res;
+export const createRole = async (roleData: any) => {
+  return await makeRequest('/roles', {
+    method: 'POST',
+    body: JSON.stringify(roleData),
+  });
+};
+
+export const updateRole = async (roleId: number, roleData: any) => {
+  return await makeRequest(`/roles/${roleId}`, {
+    method: 'PUT',
+    body: JSON.stringify(roleData),
+  });
+};
+
+export const deleteRole = async (roleId: number) => {
+  return await makeRequest(`/roles/${roleId}`, {
+    method: 'DELETE',
+  });
 };
