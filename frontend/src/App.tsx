@@ -11,6 +11,7 @@ import EvaluationsPage from './pages/EvaluationsPage';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';
 import ProfilePage from './pages/ProfilePage';
+import RolesPage from './components/roles/RolesPage';
 
 // Import layout
 import MainLayout from './components/layout/MainLayout';
@@ -97,6 +98,7 @@ const App: React.FC = () => {
           <Route path="users" element={<UsersPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="Roles" element={<RolesPage />} />
         </Route>
 
         {/* Catch all route */}

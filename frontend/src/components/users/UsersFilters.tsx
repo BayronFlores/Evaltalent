@@ -44,11 +44,12 @@ const UsersFilters: React.FC<UsersFiltersProps> = ({
         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <option value="">Todos los roles</option>
-        {roles.map((role) => (
-          <option key={role.id} value={role.name}>
-            {role.name}
-          </option>
-        ))}
+        {Array.isArray(roles) &&
+          roles.map((role) => (
+            <option key={role.id} value={role.name}>
+              {role.name}
+            </option>
+          ))}
       </select>
 
       <select

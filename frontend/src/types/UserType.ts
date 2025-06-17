@@ -26,6 +26,8 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 export interface Role {
   id: number;
   name: string;
+  description: string;
+  permissions: number[];
 }
 
 export interface CreateUserData {

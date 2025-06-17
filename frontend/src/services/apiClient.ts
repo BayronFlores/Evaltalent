@@ -23,4 +23,31 @@ export const apiClient = {
       },
     });
   },
+
+  // Métodos HTTP auxiliares
+  get: async (url: string) => {
+    const res = await apiClient.request(url, { method: 'GET' });
+    return res.json();
+  },
+
+  post: async (url: string, data: any) => {
+    const res = await apiClient.request(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  put: async (url: string, data: any) => {
+    const res = await apiClient.request(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  delete: async (url: string) => {
+    const res = await apiClient.request(url, { method: 'DELETE' });
+    return res.json();
+  },
 };

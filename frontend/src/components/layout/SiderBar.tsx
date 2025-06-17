@@ -49,6 +49,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       roles: [UserRole.ADMIN, UserRole.MANAGER],
     },
     {
+      name: 'Roles',
+      href: '/Roles',
+      icon: FileText,
+      roles: [UserRole.ADMIN],
+    },
+    {
       name: 'Perfil',
       href: '/profile',
       icon: User,

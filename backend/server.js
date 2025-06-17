@@ -3,6 +3,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('./config/database');
+const rolesRouter = require('./models/roles');
 require('dotenv').config();
 
 const app = express();
@@ -309,6 +310,8 @@ app.get('/api/roles', authenticateToken, async (req, res) => {
   }
 });
 
+app.use('/api/roles', rolesRouter);
+
 // POST - Crear nuevo usuario
 app.post('/api/users', authenticateToken, async (req, res) => {
   try {
@@ -529,4 +532,12 @@ app.listen(PORT, () => {
   console.log('   GET  /api/auth/me - Info usuario actual');
   console.log('   POST /api/auth/logout - Logout');
   console.log('   POST /api/auth/register - Registro');
+  console.log('   GET  /api/users - Obtener usuarios');
+  console.log('   POST /api/users - Crear usuario');
+  console.log('   GET  /api/roles - Obtener roles');
+  console.log('   POST /api/roles - Crear rol');
+  console.log('   GET  /api/evaluations - Obtener evaluaciones');
+  console.log('   POST /api/evaluations - Crear evaluación');
+  console.log('   GET  /api/reports - Obtener reportes');
+  console.log('   POST /api/reports - Crear reporte');
 });

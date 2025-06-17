@@ -6,7 +6,7 @@ import type {
   UpdateUserData,
   User,
 } from '../../types/UserType';
-
+import { getRoles } from '../../services/roleService';
 interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,7 +20,7 @@ const UserModal: React.FC<UserModalProps> = ({
   isOpen,
   onClose,
   user,
-  roles,
+  // roles,
   onSave,
   loading,
 }) => {
@@ -37,7 +37,11 @@ const UserModal: React.FC<UserModalProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [roles, setRoles] = useState<Role[]>([]);
 
+  useEffect(() => {
+    getRoles().then(setRoles);
+  }, []);
   useEffect(() => {
     if (user) {
       setFormData({
@@ -225,11 +229,12 @@ const UserModal: React.FC<UserModalProps> = ({
                 setFormData({ ...formData, roleId: parseInt(e.target.value) })
               }
             >
-              {roles.map((role) => (
-                <option key={role.id} value={role.id}>
-                  {role.name}
-                </option>
-              ))}
+              {Array.isArray(roles) &&
+                roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
             </select>
           </div>
 
