@@ -1,87 +1,38 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import type { RootState, AppDispatch } from './redux/store';
-import { initializeAuth } from './redux/slices/authSlises';
+import { useAuthInitialization } from './hooks/useAuthInitialization';
+import { ROUTES } from './types/routes';
+
+// Import components
+import ProtectedRoute from './components/routing/ProtectedRoute';
+import PublicRoute from './components/routing/PublicRoute';
+import { renderProtectedRoutes } from './components/routing/RouteConfig';
 
 // Import pages
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/Dashboard/DashboardPage';
-import EvaluationsPage from './pages/EvaluationsPage';
-import UsersPage from './pages/UsersPage';
-import ReportsPage from './pages/ReportsPage';
-import ProfilePage from './pages/ProfilePage';
-import RolesPage from './components/roles/RolesPage';
+import NoAutorizado from './pages/NoAutorizado';
 
 // Import layout
 import MainLayout from './components/layout/MainLayout';
-import LoadingSpinner from './components/common/LoadingSpinner';
-
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const { isAuthenticated, loading, initialized } = useSelector(
-    (state: RootState) => state.auth,
-  );
-
-  // Show loading while initializing auth
-  if (!initialized || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
-
-// Public Route Component (redirect if authenticated)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, initialized, loading } = useSelector(
-    (state: RootState) => state.auth,
-  );
-
-  // Show loading while initializing auth
-  if (!initialized || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  return !isAuthenticated ? (
-    <>{children}</>
-  ) : (
-    <Navigate to="/dashboard" replace />
-  );
-};
 
 const App: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { initialized } = useSelector((state: RootState) => state.auth);
-
-  useEffect(() => {
-    // Initialize authentication state on app load
-    if (!initialized) {
-      dispatch(initializeAuth());
-    }
-  }, [dispatch, initialized]);
+  useAuthInitialization();
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       <Routes>
         {/* Public Routes */}
         <Route
-          path="/login"
+          path={ROUTES.LOGIN}
           element={
             <PublicRoute>
               <LoginPage />
             </PublicRoute>
           }
         />
+
+        {/* No Autorizado Route */}
+        <Route path={ROUTES.NO_AUTORIZADO} element={<NoAutorizado />} />
 
         {/* Protected Routes */}
         <Route
@@ -92,17 +43,12 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="evaluations" element={<EvaluationsPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="Roles" element={<RolesPage />} />
+          <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+          {renderProtectedRoutes()}
         </Route>
 
         {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
       </Routes>
     </div>
   );

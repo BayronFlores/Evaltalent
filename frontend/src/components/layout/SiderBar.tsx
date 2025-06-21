@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       name: 'Usuarios',
       href: '/users',
       icon: Users,
-      roles: [UserRole.ADMIN, UserRole.MANAGER],
+      roles: [UserRole.ADMIN],
     },
     {
       name: 'Reportes',
@@ -110,13 +110,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <NavLink
                     to={item.href}
                     onClick={onClose}
-                    className={`
-                      sidebar-link
-                      ${isActive ? 'active' : ''}
-                    `}
+                    className={`${
+                      isActive ? 'active' : ''
+                    } flex items-center p-2 text-gray-900 rounded-lg hover:text-white hover:bg-gray-700 group`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.name}</span>
+                    <Icon className="w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                    <span className="ms-3">{item.name}</span>
                   </NavLink>
                 </li>
               );
