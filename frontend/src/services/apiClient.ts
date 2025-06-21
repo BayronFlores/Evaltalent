@@ -50,4 +50,21 @@ export const apiClient = {
     const res = await apiClient.request(url, { method: 'DELETE' });
     return res.json();
   },
+  getBlob: async (url: string, options?: RequestInit) => {
+    const res = await apiClient.request(url, {
+      method: 'GET',
+      cache: 'no-store',
+      ...(options || {}),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Error ${res.status}: ${errorText}`);
+    }
+
+    return {
+      data: await res.blob(),
+      headers: Object.fromEntries(res.headers.entries()),
+    };
+  },
 };

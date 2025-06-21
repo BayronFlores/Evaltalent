@@ -164,6 +164,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
         state.initialized = true;
+        localStorage.setItem('authToken', action.payload.token);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -193,6 +194,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
+        localStorage.removeItem('authToken');
       })
       // Register user cases
       .addCase(registerUser.pending, (state) => {

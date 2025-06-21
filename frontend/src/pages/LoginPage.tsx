@@ -61,6 +61,7 @@ const LoginPage: React.FC = () => {
     { role: 'Empleado', email: 'employee', password: 'employee123' },
   ];
 
+  localStorage.getItem('authToken');
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f0f9ff] to-[#f1f5f9] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">

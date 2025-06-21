@@ -7,6 +7,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const roleRoutes = require('./routes/roles');
+const reportRoutes = require('./routes/reports'); // ← AGREGAR ESTA LÍNEA
+const ScheduledReports = require('./services/scheduledReports');
 
 const app = express();
 
@@ -48,6 +50,9 @@ app.get('/api/db/test', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
+app.use('/api/reports', reportRoutes);
+
+ScheduledReports.init();
 
 const PORT = process.env.PORT || 5000;
 
@@ -65,4 +70,8 @@ app.listen(PORT, () => {
   console.log('   PUT  /api/users/:id - Actualizar usuario');
   console.log('   DELETE /api/users/:id - Eliminar usuario');
   console.log('   GET  /api/roles - Obtener roles');
+  console.log('   GET  /api/reports - Obtener reportes'); // ← AGREGAR
+  console.log('   GET  /api/reports/types - Tipos de reportes'); // ← AGREGAR
+  console.log('   POST /api/reports - Crear reporte'); // ← AGREGAR
+  console.log('Reportes programados inicializados');
 });

@@ -1,31 +1,35 @@
--- Crear base de datos
+-- =========================
+-- 1. CREAR BASE DE DATOS Y USARLA
+-- =========================
 CREATE DATABASE evaltalent;
-
--- Usar la base de datos
 \c evaltalent;
 
--- Tabla de permisos (NUEVA)
+-- =========================
+-- 2. TABLAS
+-- =========================
+
+-- Tabla de permisos
 CREATE TABLE permissions (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
-    module VARCHAR(50), -- ej: 'users', 'evaluations', 'reports'
-    action VARCHAR(50), -- ej: 'create', 'read', 'update', 'delete'
+    module VARCHAR(50),
+    action VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de roles (MEJORADA)
+-- Tabla de roles
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
     description TEXT,
-    is_system_role BOOLEAN DEFAULT false, -- para roles del sistema que no se pueden eliminar
+    is_system_role BOOLEAN DEFAULT false,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de relación roles-permisos (NUEVA)
+-- Tabla de relación roles-permisos
 CREATE TABLE role_permissions (
     id SERIAL PRIMARY KEY,
     role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
@@ -35,7 +39,7 @@ CREATE TABLE role_permissions (
     UNIQUE(role_id, permission_id)
 );
 
--- Tabla de usuarios (SIN CAMBIOS MAYORES)
+-- Tabla de usuarios
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
@@ -104,64 +108,52 @@ CREATE TABLE reports (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- INSERTAR PERMISOS POR DEFECTO
+-- =========================
+-- 3. DATOS DE PRUEBA
+-- =========================
+
+-- Permisos
 INSERT INTO permissions (name, description, module, action) VALUES 
--- Permisos de usuarios
 ('users.create', 'Crear usuarios', 'users', 'create'),
 ('users.read', 'Ver usuarios', 'users', 'read'),
 ('users.update', 'Actualizar usuarios', 'users', 'update'),
 ('users.delete', 'Eliminar usuarios', 'users', 'delete'),
 ('users.manage_roles', 'Gestionar roles de usuarios', 'users', 'manage_roles'),
-
--- Permisos de evaluaciones
 ('evaluations.create', 'Crear evaluaciones', 'evaluations', 'create'),
 ('evaluations.read', 'Ver evaluaciones', 'evaluations', 'read'),
 ('evaluations.update', 'Actualizar evaluaciones', 'evaluations', 'update'),
 ('evaluations.delete', 'Eliminar evaluaciones', 'evaluations', 'delete'),
 ('evaluations.evaluate_others', 'Evaluar a otros', 'evaluations', 'evaluate_others'),
 ('evaluations.view_all', 'Ver todas las evaluaciones', 'evaluations', 'view_all'),
-
--- Permisos de reportes
 ('reports.create', 'Crear reportes', 'reports', 'create'),
 ('reports.read', 'Ver reportes', 'reports', 'read'),
 ('reports.export', 'Exportar reportes', 'reports', 'export'),
-
--- Permisos de roles
 ('roles.create', 'Crear roles', 'roles', 'create'),
 ('roles.read', 'Ver roles', 'roles', 'read'),
 ('roles.update', 'Actualizar roles', 'roles', 'update'),
 ('roles.delete', 'Eliminar roles', 'roles', 'delete'),
-
--- Permisos de sistema
 ('system.admin', 'Administración completa del sistema', 'system', 'admin'),
 ('dashboard.view', 'Ver dashboard', 'dashboard', 'view');
 
--- INSERTAR ROLES POR DEFECTO
+-- Roles
 INSERT INTO roles (name, description, is_system_role) VALUES 
 ('admin', 'Administrador del sistema', true),
 ('manager', 'Supervisor/Líder de equipo', true),
 ('employee', 'Empleado', true),
 ('hr', 'Recursos Humanos', false);
 
--- ASIGNAR PERMISOS A ROLES
--- Admin: todos los permisos
+-- Asignación de permisos a roles
 INSERT INTO role_permissions (role_id, permission_id) 
 SELECT 1, id FROM permissions;
-
--- Manager: permisos de evaluación y reportes
 INSERT INTO role_permissions (role_id, permission_id) 
 SELECT 2, id FROM permissions 
 WHERE name IN (
     'users.read', 'evaluations.create', 'evaluations.read', 'evaluations.update', 
     'evaluations.evaluate_others', 'reports.read', 'reports.create', 'dashboard.view'
 );
-
--- Employee: permisos básicos
 INSERT INTO role_permissions (role_id, permission_id) 
 SELECT 3, id FROM permissions 
 WHERE name IN ('evaluations.read', 'dashboard.view');
-
--- HR: permisos de usuarios y reportes
 INSERT INTO role_permissions (role_id, permission_id) 
 SELECT 4, id FROM permissions 
 WHERE name IN (
@@ -170,14 +162,63 @@ WHERE name IN (
     'reports.export', 'dashboard.view'
 );
 
--- INSERTAR USUARIOS POR DEFECTO
-INSERT INTO users (username, email, password_hash, first_name, last_name, role_id, department, position) VALUES 
-('admin', 'admin@evaltalent.com', '$2b$10$BV09pnw03UiTsCLaWNXneuj8G4EgO6JgHGfDDcPh0bwlFHQSHKISu', 'Admin', 'System', 1, 'Management', 'System Administrator'),
-('manager', 'manager@evaltalent.com', '$2b$10$/xVF2EVXHGMjxAcBaVJw0OvFH9dK1uMey2/hPDdCRVAwpaq4tJ4Im', 'Manager', 'User', 2, 'Development', 'Team Lead'),
-('employee', 'employee@evaltalent.com', '$2b$10$prkuPv1EYZJfsUBl7K6lC.hJKIjODYnVPkpSndg20/ccWJHobJ2ES', 'Employee', 'User', 3, 'Development', 'Developer');
+-- Usuarios de prueba
+-- admin: admin123 | manager: manager123 | employee: employee123
+INSERT INTO users (username, email, password_hash, first_name, last_name, role_id, department, position, hire_date)
+VALUES 
+('admin', 'admin@evaltalent.com', '$2b$10$BV09pnw03UiTsCLaWNXneuj8G4EgO6JgHGfDDcPh0bwlFHQSHKISu', 'Admin', 'System', 1, 'Management', 'System Administrator', '2022-01-01'),
+('manager', 'manager@evaltalent.com', '$2b$10$/xVF2EVXHGMjxAcBaVJw0OvFH9dK1uMey2/hPDdCRVAwpaq4tJ4Im', 'María', 'García', 2, 'Development', 'Team Lead', '2022-03-15'),
+('employee', 'employee@evaltalent.com', '$2b$10$prkuPv1EYZJfsUBl7K6lC.hJKIjODYnVPkpSndg20/ccWJHobJ2ES', 'Juan', 'Pérez', 3, 'Development', 'Developer', '2023-02-10');
 
--- ÍNDICES PARA MEJORAR RENDIMIENTO
-CREATE INDEX idx_users_role_id ON users(role_id);
-CREATE INDEX idx_role_permissions_role_id ON role_permissions(role_id);
-CREATE INDEX idx_role_permissions_permission_id ON role_permissions(permission_id);
-CREATE INDEX idx_permissions_module ON permissions(module);
+-- Ciclos de evaluación
+INSERT INTO evaluation_cycles (name, description, start_date, end_date, status, created_by)
+VALUES 
+('Ciclo Q2 2024', 'Evaluación trimestral Q2', '2024-04-01', '2024-06-30', 'active', 1),
+('Ciclo Q3 2024', 'Evaluación trimestral Q3', '2024-07-01', '2024-09-30', 'draft', 1);
+
+-- Plantillas de evaluación
+INSERT INTO evaluation_templates (name, description, questions, kpis, created_by)
+VALUES 
+('Plantilla General', 'Evaluación estándar de desempeño',
+ '[{"question":"¿Cumple con los objetivos?","type":"yesno"},{"question":"Comentarios adicionales","type":"text"}]',
+ '[{"kpi":"Puntualidad"},{"kpi":"Calidad de trabajo"}]', 1),
+('Plantilla Liderazgo', 'Evaluación de habilidades de liderazgo',
+ '[{"question":"¿Lidera efectivamente?","type":"yesno"},{"question":"¿Motiva al equipo?","type":"yesno"}]',
+ '[{"kpi":"Liderazgo"},{"kpi":"Comunicación"}]', 2);
+
+-- Evaluaciones de prueba
+INSERT INTO evaluations (cycle_id, template_id, evaluator_id, evaluatee_id, status, responses, score, comments, submitted_at)
+VALUES
+  (1, 1, 2, 3, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"Sí"},{"question":"Comentarios adicionales","answer":"Buen trabajo"}]', 9.5, 'Excelente desempeño', '2024-06-10 10:00:00'),
+  (1, 1, 2, 1, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"No"},{"question":"Comentarios adicionales","answer":"Debe mejorar puntualidad"}]', 7.0, 'Puntualidad baja', '2024-06-12 11:00:00'),
+  (1, 1, 2, 3, 'pending', NULL, NULL, NULL, NULL),
+  (2, 2, 1, 2, 'pending', NULL, NULL, NULL, NULL);
+
+-- Reportes de prueba
+INSERT INTO reports (name, type, filters, data, generated_by)
+VALUES 
+('Reporte de Evaluaciones por Usuario', 'evaluaciones_por_usuario', '{"cycle":"Q2 2024"}',
+ '[{"nombre_completo":"Juan Pérez","department":"Development","total_evaluaciones":2,"evaluaciones_completadas":1,"evaluaciones_pendientes":1,"promedio_score":9.5}]', 1),
+('Reporte de Evaluaciones por Departamento', 'evaluaciones_por_departamento', '{"cycle":"Q2 2024"}',
+ '[{"department":"Development","total_empleados":2,"total_evaluaciones":3,"evaluaciones_completadas":2,"promedio_score":8.25}]', 1),
+('Reporte de Evaluaciones Pendientes', 'evaluaciones_pendientes', '{"cycle":"Q3 2024"}',
+ '[{"nombre_completo":"María García","department":"Development","total_evaluaciones":1,"evaluaciones_pendientes":1}]', 1);
+
+-- =========================
+-- 4. ÍNDICES PARA RENDIMIENTO
+-- =========================
+CREATE INDEX IF NOT EXISTS idx_users_role_id ON users(role_id);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_role_id ON role_permissions(role_id);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_permission_id ON role_permissions(permission_id);
+CREATE INDEX IF NOT EXISTS idx_permissions_module ON permissions(module);
+
+-- =========================
+-- 5. CONSULTAS DE VERIFICACIÓN
+-- =========================
+SELECT * FROM users;
+SELECT * FROM roles;
+SELECT * FROM permissions;
+SELECT * FROM evaluation_cycles;
+SELECT * FROM evaluation_templates;
+SELECT * FROM evaluations;
+SELECT * FROM reports;
