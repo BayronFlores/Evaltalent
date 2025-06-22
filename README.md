@@ -4,6 +4,13 @@ EvalTalent es una aplicación web moderna para la gestión, seguimiento y análi
 
 ---
 
+## Requisitos previos
+
+Node.js 18+
+npm 9+
+PostgreSQL (o la base de datos que uses)
+Git
+
 ## 🚀 Tecnologías Utilizadas
 
 ### Frontend
