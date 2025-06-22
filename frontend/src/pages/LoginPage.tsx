@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import { login, clearError, resetAuth } from '../redux/slices/authSlises';
-import { BarChart3, Eye, EyeOff, Mail, Lock, Info, Trash2 } from 'lucide-react';
+import { login, clearError } from '../redux/slices/authSlises';
+import { BarChart3, Eye, EyeOff, Mail, Lock, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { tokenManager } from '../services/tokenManager';
 
@@ -55,15 +55,6 @@ const LoginPage: React.FC = () => {
     setShowCredentials(false);
   };
 
-  // Función para limpiar todo el estado (debugging)
-  const clearAllState = () => {
-    console.log('🗑️ Clearing all state...');
-    localStorage.clear();
-    sessionStorage.clear();
-    dispatch(resetAuth());
-    window.location.reload();
-  };
-
   // Credenciales actualizadas que coinciden con el backend
   const exampleCredentials = [
     { role: 'Administrador', email: 'admin', password: 'admin123' },
@@ -92,18 +83,6 @@ const LoginPage: React.FC = () => {
           <p className="mt-2 text-sm text-[#475569]">
             Inicia sesión en tu cuenta
           </p>
-        </div>
-
-        {/* Debug Button - Temporal */}
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={clearAllState}
-            className="inline-flex items-center px-3 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Limpiar Todo (Debug)
-          </button>
         </div>
 
         {/* Demo Credentials Info */}
