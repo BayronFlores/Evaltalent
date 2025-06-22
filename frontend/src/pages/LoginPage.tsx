@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import { login, clearError } from '../redux/slices/authSlises';
-import { BarChart3, Eye, EyeOff, Mail, Lock, Info } from 'lucide-react';
+import { login, clearError, resetAuth } from '../redux/slices/authSlises';
+import { BarChart3, Eye, EyeOff, Mail, Lock, Info, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { tokenManager } from '../services/tokenManager';
 
 import type { AppDispatch, RootState } from '../redux/store';
 import type { LoginForm } from '../types/FormType';
@@ -54,6 +55,15 @@ const LoginPage: React.FC = () => {
     setShowCredentials(false);
   };
 
+  // Función para limpiar todo el estado (debugging)
+  const clearAllState = () => {
+    console.log('🗑️ Clearing all state...');
+    localStorage.clear();
+    sessionStorage.clear();
+    dispatch(resetAuth());
+    window.location.reload();
+  };
+
   // Credenciales actualizadas que coinciden con el backend
   const exampleCredentials = [
     { role: 'Administrador', email: 'admin', password: 'admin123' },
@@ -61,7 +71,15 @@ const LoginPage: React.FC = () => {
     { role: 'Empleado', email: 'employee', password: 'employee123' },
   ];
 
-  localStorage.getItem('authToken');
+  // Debug: mostrar estado de autenticación
+  useEffect(() => {
+    console.log('🔍 Auth Debug:');
+    console.log('- isAuthenticated:', isAuthenticated);
+    console.log('- Token exists:', !!tokenManager.getToken());
+    console.log('- User exists:', !!tokenManager.getUser());
+    tokenManager.debug();
+  }, [isAuthenticated]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f0f9ff] to-[#f1f5f9] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -74,6 +92,18 @@ const LoginPage: React.FC = () => {
           <p className="mt-2 text-sm text-[#475569]">
             Inicia sesión en tu cuenta
           </p>
+        </div>
+
+        {/* Debug Button - Temporal */}
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={clearAllState}
+            className="inline-flex items-center px-3 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Limpiar Todo (Debug)
+          </button>
         </div>
 
         {/* Demo Credentials Info */}

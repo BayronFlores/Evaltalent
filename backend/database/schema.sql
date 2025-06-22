@@ -164,11 +164,12 @@ WHERE name IN (
 
 -- Usuarios de prueba
 -- admin: admin123 | manager: manager123 | employee: employee123
-INSERT INTO users (username, email, password_hash, first_name, last_name, role_id, department, position, hire_date)
+-- ⚠️ CAMBIO AQUÍ: Agregamos manager_id al INSERT
+INSERT INTO users (username, email, password_hash, first_name, last_name, role_id, department, position, hire_date, manager_id)
 VALUES 
-('admin', 'admin@evaltalent.com', '$2b$10$BV09pnw03UiTsCLaWNXneuj8G4EgO6JgHGfDDcPh0bwlFHQSHKISu', 'Admin', 'System', 1, 'Management', 'System Administrator', '2022-01-01'),
-('manager', 'manager@evaltalent.com', '$2b$10$/xVF2EVXHGMjxAcBaVJw0OvFH9dK1uMey2/hPDdCRVAwpaq4tJ4Im', 'María', 'García', 2, 'Development', 'Team Lead', '2022-03-15'),
-('employee', 'employee@evaltalent.com', '$2b$10$prkuPv1EYZJfsUBl7K6lC.hJKIjODYnVPkpSndg20/ccWJHobJ2ES', 'Juan', 'Pérez', 3, 'Development', 'Developer', '2023-02-10');
+('admin', 'admin@evaltalent.com', '$2b$10$BV09pnw03UiTsCLaWNXneuj8G4EgO6JgHGfDDcPh0bwlFHQSHKISu', 'Admin', 'System', 1, 'Management', 'System Administrator', '2022-01-01', NULL),
+('manager', 'manager@evaltalent.com', '$2b$10$/xVF2EVXHGMjxAcBaVJw0OvFH9dK1uMey2/hPDdCRVAwpaq4tJ4Im', 'María', 'García', 2, 'Development', 'Team Lead', '2022-03-15', NULL),
+('employee', 'employee@evaltalent.com', '$2b$10$prkuPv1EYZJfsUBl7K6lC.hJKIjODYnVPkpSndg20/ccWJHobJ2ES', 'Juan', 'Pérez', 3, 'Development', 'Developer', '2023-02-10', 2);
 
 -- Ciclos de evaluación
 INSERT INTO evaluation_cycles (name, description, start_date, end_date, status, created_by)
@@ -208,6 +209,7 @@ VALUES
 -- 4. ÍNDICES PARA RENDIMIENTO
 -- =========================
 CREATE INDEX IF NOT EXISTS idx_users_role_id ON users(role_id);
+CREATE INDEX IF NOT EXISTS idx_users_manager_id ON users(manager_id); -- ← NUEVO ÍNDICE
 CREATE INDEX IF NOT EXISTS idx_role_permissions_role_id ON role_permissions(role_id);
 CREATE INDEX IF NOT EXISTS idx_role_permissions_permission_id ON role_permissions(permission_id);
 CREATE INDEX IF NOT EXISTS idx_permissions_module ON permissions(module);

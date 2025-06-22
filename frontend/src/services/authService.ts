@@ -1,4 +1,3 @@
-// src/services/authService.ts
 import type { User, UserRole } from '../types/UserType';
 import type { LoginForm } from '../types/FormType';
 import { tokenManager } from './tokenManager';
@@ -16,6 +15,7 @@ interface LoginResponse {
     firstName: string;
     lastName: string;
     role: string;
+    hireDate: string | null;
     department: string;
     position: string;
     createdAt: string;
@@ -52,6 +52,7 @@ const mapBackendUserToUser = (
     roleId: 0, // o el real si lo tienes
     department: backendUser.department ?? '',
     position: backendUser.position ?? '',
+    hireDate: backendUser.hireDate ?? '',
     isActive: true, // o usa backendUser.isActive si viene
     createdAt: backendUser.createdAt ?? new Date().toISOString(),
     updatedAt: backendUser.updatedAt ?? new Date().toISOString(),
@@ -86,14 +87,32 @@ export const authService = {
       }
 
       const data: LoginResponse = await response.json();
-      console.log('✅ Login successful:', data);
+      console.log('✅ Login successful - RAW DATA:', data);
+
+      // 🔍 NUEVO LOG: Verificar el token que llega
+      console.log('🔍 Token recibido del backend:', data.token);
 
       // Mapear usuario del backend al formato del frontend
       const user = mapBackendUserToUser(data.user);
+      console.log('✅ Mapped user:', user);
+
+      // Limpiar storage antes de guardar nuevos datos
+      tokenManager.clear();
 
       // Guardar token y usuario
       tokenManager.setToken(data.token);
       tokenManager.setUser(user);
+
+      // 🔍 NUEVO LOG: Verificar que el token guardado es el mismo que se recibió
+      console.log(
+        '🔍 ¿El token guardado es igual al recibido?',
+        tokenManager.getToken() === data.token,
+      );
+
+      console.log('✅ Saved to localStorage:', {
+        token: tokenManager.getToken(),
+        user: tokenManager.getUser(),
+      });
 
       return {
         user,
@@ -147,6 +166,7 @@ export const authService = {
       // Primero intentar obtener del localStorage
       const cachedUser = tokenManager.getUser();
       if (cachedUser) {
+        console.log('🔍 Using cached user:', cachedUser);
         return cachedUser;
       }
 
@@ -200,6 +220,7 @@ export const authService = {
 
       // Limpiar storage local
       tokenManager.clear();
+      console.log('✅ Logout completed, storage cleared');
     } catch (error) {
       console.error('❌ Logout error:', error);
       // Asegurar que se limpie el storage aunque haya error

@@ -5,6 +5,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 // Todas las rutas de usuarios requieren autenticación
 router.get('/', authenticateToken, userController.getAllUsers);
+router.get('/team', authenticateToken, userController.getTeam);
 router.post('/', authenticateToken, userController.createUser);
 router.put('/:id', authenticateToken, userController.updateUser);
 router.delete('/:id', authenticateToken, userController.deleteUser);

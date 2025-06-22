@@ -1,10 +1,6 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+import { tokenManager } from './tokenManager';
 
-const tokenManager = {
-  getToken(): string | null {
-    return localStorage.getItem('authToken');
-  },
-};
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export const apiClient = {
   request: async (url: string, options?: RequestInit): Promise<Response> => {
@@ -50,6 +46,7 @@ export const apiClient = {
     const res = await apiClient.request(url, { method: 'DELETE' });
     return res.json();
   },
+
   getBlob: async (url: string, options?: RequestInit) => {
     const res = await apiClient.request(url, {
       method: 'GET',

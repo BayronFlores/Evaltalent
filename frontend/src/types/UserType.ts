@@ -8,6 +8,7 @@ export interface User {
   roleId: number;
   department?: string;
   position?: string;
+  hireDate: string | null;
   isActive: boolean;
 
   createdAt: string; // o Date si lo estás manejando como objeto Date

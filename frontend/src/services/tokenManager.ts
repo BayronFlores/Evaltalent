@@ -30,4 +30,20 @@ export const tokenManager = {
     this.removeToken();
     this.removeUser();
   },
+
+  // Métodos adicionales útiles
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  },
+
+  getUserId(): number | null {
+    const user = this.getUser();
+    return user?.id || null;
+  },
+
+  // Para debugging
+  debug() {
+    console.log('🔍 Token:', this.getToken());
+    console.log('🔍 User:', this.getUser());
+  },
 };

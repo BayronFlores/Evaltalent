@@ -1,5 +1,6 @@
 // src/services/userService.ts
 const API_BASE_URL = 'http://localhost:5000/api';
+import { tokenManager } from '../services/tokenManager';
 import type {
   User,
   Role,
@@ -8,7 +9,7 @@ import type {
 } from '../types/UserType';
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('authToken');
+  const token = tokenManager.getToken();
   return {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
@@ -114,6 +115,27 @@ export const userService = {
       }
     } catch (error) {
       console.error('❌ Delete user error:', error);
+      throw error;
+    }
+  },
+
+  // Obtener equipo del manager
+  getTeam: async (): Promise<User[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/team`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener el equipo');
+      }
+
+      const data = await response.json();
+      console.log('Respuesta cruda del backend:', data);
+      return data.team;
+    } catch (error) {
+      console.error('❌ Get team error:', error);
       throw error;
     }
   },

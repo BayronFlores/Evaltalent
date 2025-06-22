@@ -240,3 +240,57 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar usuario' });
   }
 };
+exports.getTeam = async (req, res) => {
+  try {
+    const manager_id = req.user.id; // El id del usuario autenticado (manager)
+
+    // 🔍 LOG 1: Verificar el ID del manager
+    console.log('🔍 ID del manager autenticado:', manager_id);
+    console.log('🔍 Tipo del manager_id:', typeof manager_id);
+
+    const query = `
+      SELECT u.id, u.username, u.email, u.first_name, u.last_name, 
+             u.department, u.position, u.hire_date, u.is_active, u.created_at,
+             r.name as role_name, r.id as role_id
+      FROM users u 
+      JOIN roles r ON u.role_id = r.id 
+      WHERE u.manager_id = $1 AND u.is_active = true
+      ORDER BY u.first_name, u.last_name
+    `;
+
+    // 🔍 LOG 2: Verificar la consulta que se va a ejecutar
+    console.log('🔍 Query a ejecutar:', query);
+    console.log('🔍 Parámetro manager_id:', manager_id);
+
+    const result = await pool.query(query, [manager_id]);
+
+    // 🔍 LOG 3: Verificar el resultado de la consulta
+    console.log('🔍 Filas encontradas:', result.rows.length);
+    console.log('🔍 Datos crudos de la DB:', result.rows);
+
+    const mappedTeam = result.rows.map((user) => ({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      department: user.department,
+      position: user.position,
+      hireDate: user.hire_date,
+      role: user.role_name,
+      roleId: user.role_id,
+      isActive: user.is_active,
+      createdAt: user.created_at,
+    }));
+
+    // 🔍 LOG 4: Verificar el resultado final
+    console.log('🔍 Team mapeado final:', mappedTeam);
+
+    res.json({
+      team: mappedTeam,
+    });
+  } catch (error) {
+    console.error('❌ Get team error:', error);
+    res.status(500).json({ message: 'Error al obtener el equipo' });
+  }
+};

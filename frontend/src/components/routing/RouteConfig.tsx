@@ -10,8 +10,14 @@ import UsersPage from '../../pages/UsersPage';
 import ReportsPage from '../../pages/ReportsPage';
 import ProfilePage from '../../pages/ProfilePage';
 import RolesPage from '../roles/RolesPage';
+import TeamPage from '../../pages/TeamPage';
 
-import { ALL_ROLES, ADMIN_ONLY, ADMIN_MANAGER } from '../../types/routes';
+import {
+  ALL_ROLES,
+  ADMIN_ONLY,
+  ADMIN_MANAGER,
+  MANAGER_ONLY,
+} from '../../types/routes';
 
 interface RouteItem {
   path: string;
@@ -44,6 +50,11 @@ const routeConfigs: RouteItem[] = [
     path: 'Roles',
     element: <RolesPage />,
     allowedRoles: ADMIN_ONLY,
+  },
+  {
+    path: 'Team',
+    element: <TeamPage />,
+    allowedRoles: MANAGER_ONLY,
   },
   {
     path: 'profile',

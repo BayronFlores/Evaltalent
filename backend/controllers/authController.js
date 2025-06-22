@@ -35,6 +35,14 @@ exports.login = async (req, res) => {
 
     const user = userResult.rows[0];
 
+    // 🔍 LOG: Usuario encontrado
+    console.log('🔍 Usuario encontrado en DB:', {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role_name,
+    });
+
     // Verificar contraseña
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
@@ -53,9 +61,19 @@ exports.login = async (req, res) => {
       role: user.role_name,
     };
 
+    // 🔍 LOG: Payload del token
+    console.log('🔍 Token payload que se va a firmar:', tokenPayload);
+
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: '24h',
     });
+
+    // 🔍 LOG: Token generado
+    console.log('🔍 Token generado:', token);
+
+    // 🔍 LOG: Verificar que el token se puede decodificar correctamente
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('🔍 Token decodificado inmediatamente:', decodedToken);
 
     console.log('✅ Login successful for user:', user.username);
 
@@ -72,6 +90,10 @@ exports.login = async (req, res) => {
         department: user.department,
         position: user.position,
         role: user.role_name,
+        hireDate: user.hire_date,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at,
+        managerId: user.manager_id,
       },
     });
   } catch (error) {
