@@ -1,5 +1,4 @@
-// src/services/userService.ts
-const API_BASE_URL = 'http://localhost:5000/api';
+import API_BASE_URL from '../config/api';
 import { tokenManager } from '../services/tokenManager';
 import type {
   User,

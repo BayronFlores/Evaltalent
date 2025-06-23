@@ -2,7 +2,7 @@ import type { User, UserRole } from '../types/UserType';
 import type { LoginForm } from '../types/FormType';
 import { tokenManager } from './tokenManager';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+import API_BASE_URL from '../config/api';
 
 // Interfaz para la respuesta del login
 interface LoginResponse {
