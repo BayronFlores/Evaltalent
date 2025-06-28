@@ -7,7 +7,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const roleRoutes = require('./routes/roles');
-const reportRoutes = require('./routes/reports'); // ← AGREGAR ESTA LÍNEA
+const reportRoutes = require('./routes/reports');
+const evaluationRoutes = require('./routes/evaluations');
 const ScheduledReports = require('./services/scheduledReports');
 
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 
 ScheduledReports.init();
 

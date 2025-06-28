@@ -169,7 +169,11 @@ INSERT INTO users (username, email, password_hash, first_name, last_name, role_i
 VALUES 
 ('admin', 'admin@evaltalent.com', '$2b$10$BV09pnw03UiTsCLaWNXneuj8G4EgO6JgHGfDDcPh0bwlFHQSHKISu', 'Admin', 'System', 1, 'Management', 'System Administrator', '2022-01-01', NULL),
 ('manager', 'manager@evaltalent.com', '$2b$10$/xVF2EVXHGMjxAcBaVJw0OvFH9dK1uMey2/hPDdCRVAwpaq4tJ4Im', 'María', 'García', 2, 'Development', 'Team Lead', '2022-03-15', NULL),
-('employee', 'employee@evaltalent.com', '$2b$10$prkuPv1EYZJfsUBl7K6lC.hJKIjODYnVPkpSndg20/ccWJHobJ2ES', 'Juan', 'Pérez', 3, 'Development', 'Developer', '2023-02-10', 2);
+('employee', 'employee@evaltalent.com', '$2b$10$prkuPv1EYZJfsUBl7K6lC.hJKIjODYnVPkpSndg20/ccWJHobJ2ES', 'Juan', 'Pérez', 3, 'Development', 'Developer', '2023-02-10', 2),
+('anagarcia', 'ana.garcia@empresa.com', '$2b$10$vk.8GKeaKe2Jnkq75JBq8O1PHagS1w53/ROARSgkexW3o20kl2XkW', 'Ana', 'García', 3, 'Development', 'Desarrolladora Senior', '2023-01-15', 2),
+('carloslopez', 'carlos.lopez@empresa.com', '$2b$10$pJVXjaxxdtVIfeKCkdA9VO9pWJqzB1cdD31bwFhzxi/W1GJcx.K8a', 'Carlos', 'López', 3, 'Design', 'Diseñador UX', '2023-02-01', 2),
+('mariarodriguez', 'maria.rodriguez@empresa.com', '$2b$10$fS7CXkxK6TtJ.SY984Ham.TviOAWpSRpcCfTD.E8jC.NqIRVunVd2', 'María', 'Rodríguez', 3, 'QA', 'QA Analyst', '2023-03-10', 2),
+('juanperez', 'juan.perez@empresa.com', '$2b$10$ZdMtS3wu8YKDnBpOekka0.jswSQsO5snIWEYmIUf3VkW3dQGycrLS', 'Juan', 'Pérez', 3, 'Development', 'Backend Developer', '2023-01-20', 2);
 
 -- Ciclos de evaluación
 INSERT INTO evaluation_cycles (name, description, start_date, end_date, status, created_by)
@@ -193,7 +197,13 @@ VALUES
   (1, 1, 2, 3, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"Sí"},{"question":"Comentarios adicionales","answer":"Buen trabajo"}]', 9.5, 'Excelente desempeño', '2024-06-10 10:00:00'),
   (1, 1, 2, 1, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"No"},{"question":"Comentarios adicionales","answer":"Debe mejorar puntualidad"}]', 7.0, 'Puntualidad baja', '2024-06-12 11:00:00'),
   (1, 1, 2, 3, 'pending', NULL, NULL, NULL, NULL),
-  (2, 2, 1, 2, 'pending', NULL, NULL, NULL, NULL);
+  (2, 2, 1, 2, 'pending', NULL, NULL, NULL, NULL),
+  (1, 1, 2, 4, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"Sí"},{"question":"Comentarios adicionales","answer":"Muy buen desempeño"}]', 8.7, 'Buen trabajo en equipo', '2024-06-11 09:30:00'),
+  (1, 2, 1, 5, 'completed', '[{"question":"¿Lidera efectivamente?","answer":"No"},{"question":"¿Motiva al equipo?","answer":"Sí"}]', 7.8, 'Debe mejorar liderazgo', '2024-06-13 14:20:00'),
+  (2, 1, 3, 6, 'pending', NULL, NULL, NULL, NULL),
+  (2, 2, 1, 7, 'completed', '[{"question":"¿Lidera efectivamente?","answer":"Sí"},{"question":"¿Motiva al equipo?","answer":"Sí"}]', 9.2, 'Excelente líder', '2024-07-05 16:45:00'),
+  (1, 1, 2, 4, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"No"},{"question":"Comentarios adicionales","answer":"Necesita mejorar puntualidad"}]', 6.5, 'Puntualidad baja', '2024-06-15 11:00:00'),
+  (1, 1, 2, 5, 'completed', '[{"question":"¿Cumple con los objetivos?","answer":"Sí"},{"question":"Comentarios adicionales","answer":"Muy dedicado"}]', 9.0, 'Buen desempeño general', '2024-06-16 10:15:00');
 
 -- Reportes de prueba
 INSERT INTO reports (name, type, filters, data, generated_by)

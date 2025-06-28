@@ -8,7 +8,6 @@ exports.login = async (req, res) => {
 
     const { username, password } = req.body;
 
-    // Validar campos requeridos
     if (!username || !password) {
       console.log('❌ Missing credentials');
       return res.status(400).json({
@@ -16,7 +15,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Buscar usuario en la base de datos
+    // Buscar usuario y rol
     const userQuery = `
       SELECT u.*, r.name as role_name 
       FROM users u 
@@ -35,7 +34,6 @@ exports.login = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // 🔍 LOG: Usuario encontrado
     console.log('🔍 Usuario encontrado en DB:', {
       id: user.id,
       username: user.username,
@@ -53,31 +51,39 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generar token JWT real
+    // Obtener permisos del rol
+    const permissionsResult = await pool.query(
+      `SELECT p.name
+       FROM permissions p
+       JOIN role_permissions rp ON p.id = rp.permission_id
+       WHERE rp.role_id = $1 AND rp.granted = true`,
+      [user.role_id],
+    );
+
+    const permissions = permissionsResult.rows.map((row) => row.name);
+
+    // Crear payload del token con permisos
     const tokenPayload = {
       id: user.id,
       username: user.username,
       email: user.email,
       role: user.role_name,
+      permissions: permissions,
     };
 
-    // 🔍 LOG: Payload del token
     console.log('🔍 Token payload que se va a firmar:', tokenPayload);
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: '24h',
     });
 
-    // 🔍 LOG: Token generado
     console.log('🔍 Token generado:', token);
 
-    // 🔍 LOG: Verificar que el token se puede decodificar correctamente
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     console.log('🔍 Token decodificado inmediatamente:', decodedToken);
 
     console.log('✅ Login successful for user:', user.username);
 
-    // Respuesta exitosa
     res.json({
       message: 'Inicio de sesión exitoso',
       token,
@@ -94,6 +100,7 @@ exports.login = async (req, res) => {
         createdAt: user.created_at,
         updatedAt: user.updated_at,
         managerId: user.manager_id,
+        permissions: permissions, // opcional incluir en la respuesta
       },
     });
   } catch (error) {

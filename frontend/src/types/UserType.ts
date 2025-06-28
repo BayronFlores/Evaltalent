@@ -16,6 +16,13 @@ export interface User {
   managerId?: number | null; // Opcional y puede ser null
 }
 
+export interface UserWithPermissions {
+  id: string;
+  nombre: string;
+  email: string;
+  rol: RoleWithPermissions;
+}
+
 export const UserRole = {
   ADMIN: 'admin',
   MANAGER: 'manager',
@@ -29,6 +36,13 @@ export interface Role {
   name: string;
   description: string;
   permissions: number[];
+}
+
+export interface RoleWithPermissions {
+  id: number;
+  name: string;
+  description: string;
+  permissions: string[]; // nombres de permisos
 }
 
 export interface CreateUserData {
