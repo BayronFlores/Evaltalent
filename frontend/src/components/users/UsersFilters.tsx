@@ -7,7 +7,7 @@ interface UsersFiltersProps {
   onSearchChange: (term: string) => void;
   roleFilter: string;
   onRoleFilterChange: (role: string) => void;
-  statusFilter: string;
+  statusFilter: string; // "" | "active" | "inactive"
   onStatusFilterChange: (status: string) => void;
   roles: Role[];
   filteredCount: number;

@@ -49,7 +49,16 @@ export const userService = {
       }
 
       const data = await response.json();
-      return data.roles;
+      console.log('Respuesta roles:', data);
+
+      // Ajusta según estructura real
+      if (Array.isArray(data)) {
+        return data; // data es el array directamente
+      } else if (Array.isArray(data.roles)) {
+        return data.roles; // data.roles es el array
+      } else {
+        throw new Error('Formato de roles inesperado');
+      }
     } catch (error) {
       console.error('❌ Get roles error:', error);
       throw error;
@@ -114,6 +123,25 @@ export const userService = {
       }
     } catch (error) {
       console.error('❌ Delete user error:', error);
+      throw error;
+    }
+  },
+
+  deleteUserPermanently: async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/permanent/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || 'Error al eliminar usuario permanentemente',
+        );
+      }
+    } catch (error) {
+      console.error('❌ Delete user permanently error:', error);
       throw error;
     }
   },

@@ -54,6 +54,7 @@ export interface CreateUserData {
   roleId: number;
   department?: string;
   position?: string;
+  hire_date?: string;
 }
 
 export interface UpdateUserData {

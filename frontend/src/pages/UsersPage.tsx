@@ -1,4 +1,3 @@
-// src/components/users/index.tsx
 import React, { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
 import type {
@@ -36,6 +35,7 @@ const UsersPage: React.FC = () => {
         userService.getUsers(),
         userService.getRoles(),
       ]);
+      console.log('Roles cargados:', rolesData); // <-- Aquí
       setUsers(usersData);
       setRoles(rolesData);
     } catch (error) {
@@ -47,13 +47,17 @@ const UsersPage: React.FC = () => {
   };
 
   const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchTermLower = searchTerm.toLowerCase();
 
+    const matchesSearch =
+      user.firstName.toLowerCase().includes(searchTermLower) ||
+      user.lastName.toLowerCase().includes(searchTermLower) ||
+      user.username.toLowerCase().includes(searchTermLower) ||
+      user.email.toLowerCase().includes(searchTermLower);
+
+    // Si user.role es string:
     const matchesRole = !roleFilter || user.role === roleFilter;
+
     const matchesStatus =
       !statusFilter ||
       (statusFilter === 'active' && user.isActive) ||
@@ -65,7 +69,14 @@ const UsersPage: React.FC = () => {
   const handleCreateUser = async (userData: CreateUserData) => {
     try {
       setModalLoading(true);
-      const newUser = await userService.createUser(userData);
+
+      // Agregar hire_date con fecha y hora actual
+      const userDataWithHireDate = {
+        ...userData,
+        hire_date: new Date().toISOString(),
+      };
+
+      const newUser = await userService.createUser(userDataWithHireDate);
       setUsers([newUser, ...users]);
       setIsModalOpen(false);
       setSuccess('Usuario creado exitosamente');
@@ -110,7 +121,7 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (user: User) => {
+  const handleDeactivateUser = async (user: User) => {
     if (
       !confirm(
         `¿Estás seguro de que quieres desactivar al usuario ${user.username}?`,
@@ -120,7 +131,7 @@ const UsersPage: React.FC = () => {
     }
 
     try {
-      await userService.deleteUser(user.id);
+      await userService.deleteUser(user.id); // Soft delete en backend
       setUsers(
         users.map((u) => (u.id === user.id ? { ...u, isActive: false } : u)),
       );
@@ -128,6 +139,26 @@ const UsersPage: React.FC = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
       setError(error.message || 'Error al desactivar usuario');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleDeleteUser = async (user: User) => {
+    if (
+      !confirm(
+        `¿Estás seguro de que quieres eliminar permanentemente al usuario ${user.username}? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await userService.deleteUserPermanently(user.id);
+      setUsers(users.filter((u) => u.id !== user.id));
+      setSuccess('Usuario eliminado permanentemente');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Error al eliminar usuario');
       setTimeout(() => setError(''), 3000);
     }
   };
@@ -181,6 +212,7 @@ const UsersPage: React.FC = () => {
       <UsersTable
         users={filteredUsers}
         onEdit={openEditModal}
+        onDeactivate={handleDeactivateUser}
         onDelete={handleDeleteUser}
       />
 

@@ -6,9 +6,15 @@ interface UsersTableProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
+  onDeactivate: (user: User) => void;
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
+const UsersTable: React.FC<UsersTableProps> = ({
+  users,
+  onEdit,
+  onDelete,
+  onDeactivate,
+}) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
@@ -100,13 +106,20 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onEdit, onDelete }) => {
                     </button>
                     {user.isActive && (
                       <button
-                        onClick={() => onDelete(user)}
-                        className="text-red-600 hover:text-red-900"
+                        onClick={() => onDeactivate(user)}
+                        className="text-orange-600 hover:text-orange-900"
                         title="Desactivar usuario"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <UserX className="w-4 h-4" />
                       </button>
                     )}
+                    <button
+                      onClick={() => onDelete(user)}
+                      className="text-red-600 hover:text-red-900"
+                      title="Eliminar usuario"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </td>
               </tr>

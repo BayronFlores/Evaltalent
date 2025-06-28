@@ -50,6 +50,14 @@ export const login = createAsyncThunk(
       return response;
     } catch (error: any) {
       console.error('❌ Redux login thunk error:', error);
+      // Revisar si el error tiene mensaje desde backend
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        return rejectWithValue(error.response.data.message);
+      }
       return rejectWithValue(error.message || 'Login failed');
     }
   },

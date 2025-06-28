@@ -6,6 +6,7 @@ require('dotenv').config();
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const permanentUserRoutes = require('./routes/users');
 const roleRoutes = require('./routes/roles');
 const reportRoutes = require('./routes/reports');
 const evaluationRoutes = require('./routes/evaluations');
@@ -50,6 +51,7 @@ app.get('/api/db/test', async (req, res) => {
 // Usar las rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/users/permanent', permanentUserRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/evaluations', evaluationRoutes);

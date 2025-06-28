@@ -213,7 +213,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-exports.deleteUser = async (req, res) => {
+exports.activeUser = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -240,6 +240,60 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar usuario' });
   }
 };
+
+exports.deleteUserPermanently = async (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  try {
+    // Verificar si el usuario existe
+    const userResult = await pool.query(
+      'SELECT id, username FROM users WHERE id = $1',
+      [userId],
+    );
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    const username = userResult.rows[0].username;
+
+    // Eliminar datos relacionados en orden para evitar violar FK
+
+    // 1. Evaluaciones donde es evaluador o evaluado
+    await pool.query(
+      'DELETE FROM evaluations WHERE evaluator_id = $1 OR evaluatee_id = $1',
+      [userId],
+    );
+
+    // 2. Reportes generados por el usuario
+    await pool.query('DELETE FROM reports WHERE generated_by = $1', [userId]);
+
+    // 3. Ciclos de evaluación creados por el usuario
+    await pool.query('DELETE FROM evaluation_cycles WHERE created_by = $1', [
+      userId,
+    ]);
+
+    // 4. Plantillas de evaluación creadas por el usuario
+    await pool.query('DELETE FROM evaluation_templates WHERE created_by = $1', [
+      userId,
+    ]);
+
+    // 5. Actualizar usuarios que tengan este usuario como manager (opcional: poner null)
+    await pool.query(
+      'UPDATE users SET manager_id = NULL WHERE manager_id = $1',
+      [userId],
+    );
+
+    // 6. Finalmente eliminar el usuario
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    res.json({
+      message: `Usuario ${username} y datos relacionados eliminados permanentemente`,
+    });
+  } catch (error) {
+    console.error('❌ Error al eliminar usuario permanentemente:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
 exports.getTeam = async (req, res) => {
   try {
     const manager_id = req.user.id; // El id del usuario autenticado (manager)

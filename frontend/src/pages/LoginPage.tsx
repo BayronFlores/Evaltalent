@@ -38,11 +38,6 @@ const LoginPage: React.FC = () => {
       console.log('🔄 Submitting login form:', data);
       const result = await dispatch(login(data));
       console.log('📡 Login result:', result);
-
-      if (login.fulfilled.match(result)) {
-        console.log('✅ Login successful, navigating to dashboard');
-        navigate('/dashboard');
-      }
     } catch (error) {
       console.error('❌ Login form error:', error);
     }

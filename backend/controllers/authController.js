@@ -51,6 +51,13 @@ exports.login = async (req, res) => {
       });
     }
 
+    if (!user.is_active) {
+      console.log('❌ Usuario inactivo:', username);
+      return res.status(403).json({
+        message: 'Su usuario no está activo',
+      });
+    }
+
     // Obtener permisos del rol
     const permissionsResult = await pool.query(
       `SELECT p.name
