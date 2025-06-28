@@ -4,6 +4,8 @@ import { evaluationService } from '../../services/evaluationService';
 export interface Evaluation {
   id: string;
   title: string;
+  evaluatorId: string;
+  evaluateeId: string;
   evaluatorName: string;
   evaluateeName: string;
   cycleName: string;
@@ -46,6 +48,7 @@ const evaluationSlice = createSlice({
       .addCase(fetchEvaluations.pending, (state) => {
         state.loading = true;
         state.error = undefined;
+        state.evaluations = [];
       })
       .addCase(fetchEvaluations.fulfilled, (state, action) => {
         state.loading = false;

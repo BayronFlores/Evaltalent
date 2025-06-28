@@ -3,27 +3,35 @@ const pool = require('../config/database');
 exports.getEvaluations = async (req, res) => {
   try {
     let query = `
-      SELECT e.*, 
-      u1.first_name || ' ' || u1.last_name as evaluator_name,
-      u2.first_name || ' ' || u2.last_name as evaluatee_name,
-      ec.name as cycle_name,
-      et.name as template_name
-      FROM evaluations e
-      LEFT JOIN users u1 ON e.evaluator_id = u1.id
-      LEFT JOIN users u2 ON e.evaluatee_id = u2.id
-      LEFT JOIN evaluation_cycles ec ON e.cycle_id = ec.id
-      LEFT JOIN evaluation_templates et ON e.template_id = et.id
+    SELECT e.*, 
+    u1.first_name || ' ' || u1.last_name as evaluator_name,
+    u2.first_name || ' ' || u2.last_name as evaluatee_name,
+    ec.name as cycle_name,
+    et.name as template_name
+    FROM evaluations e
+    LEFT JOIN users u1 ON e.evaluator_id = u1.id
+    LEFT JOIN users u2 ON e.evaluatee_id = u2.id
+    LEFT JOIN evaluation_cycles ec ON e.cycle_id = ec.id
+    LEFT JOIN evaluation_templates et ON e.template_id = et.id
     `;
 
     const params = [];
 
-    if (req.user.role === 'manager') {
+    if (req.user.role === 'admin') {
+      // Sin filtro, ve todas las evaluaciones
+    } else if (req.user.role === 'manager') {
       query += ` WHERE e.evaluatee_id IN (SELECT id FROM users WHERE manager_id = $1)`;
       params.push(req.user.id);
     } else if (req.user.role === 'employee') {
-      query += ` WHERE e.evaluatee_id = $1`;
+      query += ` WHERE e.evaluator_id = $1`;
       params.push(req.user.id);
+    } else {
+      // Si hay otros roles, no mostrar evaluaciones
+      return res
+        .status(403)
+        .json({ message: 'No autorizado para ver evaluaciones' });
     }
+
     query += ' ORDER BY e.created_at DESC';
 
     const { rows } = await pool.query(query, params);

@@ -10,6 +10,10 @@ export const ROUTES = {
   ROLES: 'roles',
   PROFILE: 'profile',
   TEAM: 'team',
+  ASSESSMENT: 'assessment',
+  HISTORY: 'history',
+  TRAINING: 'training',
+  RESULT: 'result',
 };
 
 export const ALL_ROLES: UserRole[] = [

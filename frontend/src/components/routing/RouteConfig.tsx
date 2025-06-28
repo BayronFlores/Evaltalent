@@ -8,6 +8,7 @@ import {
   MANAGER_ONLY,
   ADMIN_MANAGER,
   ALL_ROLES,
+  EMPLOYEE_ONLY,
 } from '../../types/routes';
 import { ClipboardList, FileText, User, Users, Home } from 'lucide-react';
 
@@ -19,6 +20,9 @@ import ProfilePage from '../../pages/ProfilePage';
 import RolesPage from '../roles/RolesPage';
 import TeamPage from '../../pages/TeamPage';
 import EvaluationsPage from '../../pages/EvaluationsPage';
+import Assessment from '../../pages/employee/Self-Assessment';
+import Training from '../../pages/employee/Training';
+import Results from '../../pages/employee/Results';
 
 export interface AppRoute {
   path: string;
@@ -34,12 +38,12 @@ export const getAppRoutes = (): AppRoute[] => [
     element: <DashboardPage />,
     allowedRoles: ALL_ROLES,
     name: 'Dashboard',
-    icon: Home, // ícono omitido para simplificar
+    icon: Home,
   },
   {
     path: ROUTES.EVALUATIONS,
     element: <EvaluationsPage />,
-    allowedRoles: ADMIN_MANAGER,
+    allowedRoles: ALL_ROLES,
     name: 'Evaluaciones',
     icon: ClipboardList,
   },
@@ -76,6 +80,27 @@ export const getAppRoutes = (): AppRoute[] => [
     element: <ProfilePage />,
     allowedRoles: ALL_ROLES,
     name: 'Perfil',
+    icon: User,
+  },
+  {
+    path: ROUTES.ASSESSMENT,
+    element: <Assessment />,
+    allowedRoles: EMPLOYEE_ONLY,
+    name: 'assessment',
+    icon: User,
+  },
+  {
+    path: ROUTES.TRAINING,
+    element: <Training />,
+    allowedRoles: EMPLOYEE_ONLY,
+    name: 'training',
+    icon: User,
+  },
+  {
+    path: ROUTES.RESULT,
+    element: <Results />,
+    allowedRoles: EMPLOYEE_ONLY,
+    name: 'result',
     icon: User,
   },
 ];
