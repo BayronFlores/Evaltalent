@@ -13,6 +13,7 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const { isAuthenticated, initialized, loading } = useSelector(
     (state: RootState) => state.auth,
   );
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
 
   // Show loading while initializing auth
   if (!initialized || loading) {
@@ -26,7 +27,10 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   return !isAuthenticated ? (
     <>{children}</>
   ) : (
-    <Navigate to={ROUTES.DASHBOARD} replace />
+    <Navigate
+      to={userRole ? `/${userRole}/${ROUTES.DASHBOARD}` : ROUTES.LOGIN}
+      replace
+    />
   );
 };
 

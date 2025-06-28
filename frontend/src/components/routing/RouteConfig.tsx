@@ -2,71 +2,92 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { UserRole } from '../../types/UserType';
 import ProtectedRoute from './ProtectedRoute';
+import {
+  ROUTES,
+  ADMIN_ONLY,
+  MANAGER_ONLY,
+  ADMIN_MANAGER,
+  ALL_ROLES,
+} from '../../types/routes';
+import { ClipboardList, FileText, User, Users, Home } from 'lucide-react';
 
-// Import pages
+// Importar páginas
 import DashboardPage from '../../pages/Dashboard/DashboardPage';
-import EvaluationsPage from '../../pages/EvaluationsPage';
 import UsersPage from '../../pages/UsersPage';
 import ReportsPage from '../../pages/ReportsPage';
 import ProfilePage from '../../pages/ProfilePage';
 import RolesPage from '../roles/RolesPage';
 import TeamPage from '../../pages/TeamPage';
+import EvaluationsPage from '../../pages/EvaluationsPage';
 
-import {
-  ALL_ROLES,
-  ADMIN_ONLY,
-  ADMIN_MANAGER,
-  MANAGER_ONLY,
-} from '../../types/routes';
-
-interface RouteItem {
+export interface AppRoute {
   path: string;
   element: React.ReactNode;
   allowedRoles: UserRole[];
+  name: string;
+  icon: React.ComponentType<any>;
 }
 
-const routeConfigs: RouteItem[] = [
+export const getAppRoutes = (): AppRoute[] => [
   {
-    path: 'dashboard',
+    path: ROUTES.DASHBOARD,
     element: <DashboardPage />,
     allowedRoles: ALL_ROLES,
+    name: 'Dashboard',
+    icon: Home, // ícono omitido para simplificar
   },
   {
-    path: 'evaluations',
+    path: ROUTES.EVALUATIONS,
     element: <EvaluationsPage />,
-    allowedRoles: ALL_ROLES,
+    allowedRoles: ADMIN_MANAGER,
+    name: 'Evaluaciones',
+    icon: ClipboardList,
   },
   {
-    path: 'users',
+    path: ROUTES.USERS,
     element: <UsersPage />,
     allowedRoles: ADMIN_ONLY,
+    name: 'Usuarios',
+    icon: User,
   },
   {
-    path: 'reports',
+    path: ROUTES.REPORTS,
     element: <ReportsPage />,
     allowedRoles: ADMIN_MANAGER,
+    name: 'Reportes',
+    icon: FileText,
   },
   {
-    path: 'Roles',
-    element: <RolesPage />,
-    allowedRoles: ADMIN_ONLY,
-  },
-  {
-    path: 'Team',
+    path: ROUTES.TEAM,
     element: <TeamPage />,
     allowedRoles: MANAGER_ONLY,
+    name: 'Team',
+    icon: Users,
   },
   {
-    path: 'profile',
+    path: ROUTES.ROLES,
+    element: <RolesPage />,
+    allowedRoles: ADMIN_ONLY,
+    name: 'Roles',
+    icon: Users,
+  },
+  {
+    path: ROUTES.PROFILE,
     element: <ProfilePage />,
     allowedRoles: ALL_ROLES,
+    name: 'Perfil',
+    icon: User,
   },
 ];
 
-export const renderProtectedRoutes = () => {
-  return routeConfigs.map(({ path, element, allowedRoles }) => (
+export const renderProtectedRoutes = (role: UserRole) => {
+  const routesToRender = getAppRoutes().filter((route) =>
+    route.allowedRoles.includes(role),
+  );
+
+  return routesToRender.map(({ path, element, allowedRoles }) => (
     <Route
-      key={path}
+      key={`${role}-${path}`}
       path={path}
       element={
         <ProtectedRoute allowedRoles={allowedRoles}>{element}</ProtectedRoute>

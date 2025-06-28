@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
 import { UserRole } from '../../types/UserType';
@@ -18,8 +18,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, loading, initialized, user } = useSelector(
     (state: RootState) => state.auth,
   );
+  const location = useLocation();
 
-  // Show loading while initializing auth
   if (!initialized || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
@@ -28,13 +28,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Check authentication
   if (!isAuthenticated) {
-    return <Navigate to={ROUTES.LOGIN} replace />;
+    return <Navigate to={ROUTES.LOGIN} replace state={{ from: location }} />;
   }
 
-  // Check role-based access if roles are specified
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
+    // Usuario no tiene permiso para esta ruta
+
+    // Construir la ruta correcta para el rol actual
+    const pathParts = location.pathname.split('/').filter(Boolean); // ej: ['admin', 'profile']
+    if (pathParts.length > 1) {
+      pathParts[0] = user.role; // reemplaza el prefijo por el rol real
+      const correctPath = '/' + pathParts.join('/');
+      return <Navigate to={correctPath} replace />;
+    }
+
+    // Si no se puede construir ruta, redirige a no autorizado
     return <Navigate to={ROUTES.NO_AUTORIZADO} replace />;
   }
 

@@ -20,6 +20,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const { user } = useSelector((state: RootState) => state.auth);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -199,7 +200,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <div className="p-2">
                   <button
                     onClick={() => {
-                      navigate('/profile');
+                      if (userRole) {
+                        navigate(`/${userRole}/profile`);
+                      } else {
+                        navigate('/login'); // o ruta por defecto si no hay rol
+                      }
                       setShowUserMenu(false);
                     }}
                     className="flex items-center w-full px-3 py-2 text-sm text-[#334155] hover:bg-[#f1f5f9] rounded-lg"

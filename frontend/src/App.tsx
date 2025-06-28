@@ -1,5 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from './redux/store';
 import { useAuthInitialization } from './hooks/useAuthInitialization';
 import { ROUTES } from './types/routes';
 
@@ -18,6 +20,10 @@ import MainLayout from './components/layout/MainLayout';
 const App: React.FC = () => {
   useAuthInitialization();
 
+  const userRole = useSelector(
+    (state: RootState) => state.auth.user?.role ?? null,
+  );
+
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       <Routes>
@@ -34,9 +40,10 @@ const App: React.FC = () => {
         {/* No Autorizado Route */}
         <Route path={ROUTES.NO_AUTORIZADO} element={<NoAutorizado />} />
 
-        {/* Protected Routes */}
+        {/* Protected Routes con prefijo de rol como ruta padre */}
+
         <Route
-          path="/"
+          path={`/${userRole}`}
           element={
             <ProtectedRoute>
               <MainLayout />
@@ -44,11 +51,11 @@ const App: React.FC = () => {
           }
         >
           <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-          {renderProtectedRoutes()}
+          {userRole && renderProtectedRoutes(userRole)}
         </Route>
 
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
       </Routes>
     </div>
   );

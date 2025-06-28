@@ -2,17 +2,8 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
-import { UserRole } from '../../types/UserType';
-import {
-  BarChart3,
-  Users,
-  ClipboardList,
-  FileText,
-  // Settings,
-  User,
-  X,
-  Home,
-} from 'lucide-react';
+import { getAppRoutes } from '../routing/RouteConfig';
+import { BarChart3, X } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,58 +14,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const navigation = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home,
-      roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE],
-    },
-    {
-      name: 'Evaluaciones',
-      href: '/evaluations',
-      icon: ClipboardList,
-      roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE],
-    },
-    {
-      name: 'Usuarios',
-      href: '/users',
-      icon: Users,
-      roles: [UserRole.ADMIN],
-    },
-    {
-      name: 'Reportes',
-      href: '/reports',
-      icon: FileText,
-      roles: [UserRole.ADMIN, UserRole.MANAGER],
-    },
-    {
-      name: 'team',
-      href: '/Team',
-      icon: FileText,
-      roles: [UserRole.MANAGER],
-    },
-    {
-      name: 'Roles',
-      href: '/Roles',
-      icon: FileText,
-      roles: [UserRole.ADMIN],
-    },
-    {
-      name: 'Perfil',
-      href: '/profile',
-      icon: User,
-      roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE],
-    },
-  ];
+  if (!user?.role) return null;
 
-  const filteredNavigation = navigation.filter(
-    (item) => user?.role && item.roles.includes(user.role),
+  // Llamar sin argumentos
+  const routes = getAppRoutes();
+
+  // Filtrar rutas que el usuario puede ver (según allowedRoles)
+  const filteredRoutes = routes.filter((route) =>
+    route.allowedRoles.includes(user.role),
   );
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
@@ -82,13 +33,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`
-        fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
-        lg:translate-x-0 lg:static lg:inset-0
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}
+          fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
+          lg:translate-x-0 lg:static lg:inset-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-[#e2e8f0]">
           <div className="flex items-center space-x-3">
@@ -107,21 +57,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         <nav className="mt-6 px-4">
           <ul className="space-y-2">
-            {filteredNavigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              const Icon = item.icon;
-
+            {filteredRoutes.map(({ path, name, icon: Icon }) => {
+              const isActive = location.pathname === `/${user.role}/${path}`;
               return (
-                <li key={item.name}>
+                <li key={path}>
                   <NavLink
-                    to={item.href}
+                    to={`/${user.role}/${path}`}
                     onClick={onClose}
                     className={`${
                       isActive ? 'active' : ''
                     } flex items-center p-2 text-gray-900 rounded-lg hover:text-white hover:bg-gray-700 group`}
                   >
                     <Icon className="w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                    <span className="ms-3">{item.name}</span>
+                    <span className="ms-3">{name}</span>
                   </NavLink>
                 </li>
               );
@@ -129,20 +77,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </ul>
         </nav>
 
-        {/* User info at bottom */}
+        {/* Info usuario abajo */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#e2e8f0]">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-[#e0f2fe] rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-[#0284c7]" />
+              {/* Icono usuario */}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-[#0f172a] truncate">
-                {user?.firstName} {user?.lastName}
+                {user.firstName} {user.lastName}
               </p>
               <p className="text-xs text-[#64748b] truncate">
-                {user?.role
-                  ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
-                  : ''}
+                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </p>
             </div>
           </div>

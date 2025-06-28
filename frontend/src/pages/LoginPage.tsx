@@ -11,7 +11,7 @@ import type { LoginForm } from '../types/FormType';
 
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error, isAuthenticated } = useSelector(
+  const { loading, error, isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth,
   );
   const [showPassword, setShowPassword] = useState(false);
@@ -27,10 +27,10 @@ const LoginPage: React.FC = () => {
 
   // Redirigir si ya está autenticado
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
+    if (isAuthenticated && user?.role) {
+      navigate(`/${user.role}/dashboard`);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user?.role, navigate]);
 
   const onSubmit = async (data: LoginForm) => {
     dispatch(clearError());
