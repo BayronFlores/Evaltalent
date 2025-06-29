@@ -1,65 +1,55 @@
-interface Curso {
-  id: number;
-  titulo: string;
-  progreso: number;
-  estado: 'En progreso' | 'Completado' | string;
-  enlace: string;
-}
+import { useEffect, useState } from 'react';
+import { courseService } from '../../services/courseService'; // Ajusta ruta según tu estructura
+import type { Curso } from '../../services/courseService'; // Ajusta ruta según tu estructura
 
-const cursosMock: Curso[] = [
-  {
-    id: 1,
-    titulo: 'Comunicación Efectiva',
-    progreso: 75,
-    estado: 'En progreso',
-    enlace: '#',
-  },
-  {
-    id: 2,
-    titulo: 'Liderazgo para Equipos',
-    progreso: 100,
-    estado: 'Completado',
-    enlace: '#',
-  },
-  {
-    id: 3,
-    titulo: 'Resolución de Conflictos',
-    progreso: 40,
-    estado: 'En progreso',
-    enlace: '#',
-  },
-];
+const Training = () => {
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const Capacitacion = () => {
+  useEffect(() => {
+    courseService
+      .getCourses()
+      .then((data) => {
+        setCursos(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>Loading courses...</p>;
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <h2 className="text-2xl font-semibold">Capacitación</h2>
-      {cursosMock.map((curso) => (
+      {cursos.map((curso) => (
         <div key={curso.id} className="border rounded p-4 shadow-sm">
-          <h3 className="text-lg font-medium mb-2">{curso.titulo}</h3>
+          <h3 className="text-lg font-medium mb-2">{curso.title}</h3>
           <div className="flex items-center justify-between mb-2">
             <div className="w-full bg-gray-200 rounded-full h-3 mr-4">
               <div
                 className={`h-3 rounded-full ${
-                  curso.progreso === 100 ? 'bg-green-600' : 'bg-blue-600'
+                  curso.progress === 100 ? 'bg-green-600' : 'bg-blue-600'
                 }`}
-                style={{ width: `${curso.progreso}%` }}
+                style={{ width: `${curso.progress}%` }}
               />
             </div>
             <span className="text-sm font-semibold text-gray-700">
-              {curso.progreso}%
+              {curso.progress}%
             </span>
           </div>
           <p className="mb-2">
-            Estado: <span className="font-semibold">{curso.estado}</span>
+            Estado: <span className="font-semibold">{curso.status}</span>
           </p>
           <a
-            href={curso.enlace}
+            href={curso.link}
             className="text-blue-600 hover:underline"
             target="_blank"
             rel="noreferrer"
           >
-            Acceder al curso
+            Access course
           </a>
         </div>
       ))}
@@ -67,4 +57,4 @@ const Capacitacion = () => {
   );
 };
 
-export default Capacitacion;
+export default Training;

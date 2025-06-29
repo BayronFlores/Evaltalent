@@ -10,6 +10,7 @@ const permanentUserRoutes = require('./routes/users');
 const roleRoutes = require('./routes/roles');
 const reportRoutes = require('./routes/reports');
 const evaluationRoutes = require('./routes/evaluations');
+const courseRoutes = require('./routes/course');
 const ScheduledReports = require('./services/scheduledReports');
 
 const app = express();
@@ -55,6 +56,7 @@ app.use('/api/users/permanent', permanentUserRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/evaluations', evaluationRoutes);
+app.use('/api/course', courseRoutes);
 
 ScheduledReports.init();
 

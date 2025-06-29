@@ -108,6 +108,27 @@ CREATE TABLE reports (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE courses (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  link VARCHAR(500) NOT NULL,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_courses (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+  progress INTEGER DEFAULT 0,
+  status VARCHAR(50) DEFAULT 'In Progress',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, course_id)
+);
+
+
 -- =========================
 -- 3. DATOS DE PRUEBA
 -- =========================
@@ -214,6 +235,18 @@ VALUES
  '[{"department":"Development","total_empleados":2,"total_evaluaciones":3,"evaluaciones_completadas":2,"promedio_score":8.25}]', 1),
 ('Reporte de Evaluaciones Pendientes', 'evaluaciones_pendientes', '{"cycle":"Q3 2024"}',
  '[{"nombre_completo":"María García","department":"Development","total_evaluaciones":1,"evaluaciones_pendientes":1}]', 1);
+
+-- Insert example courses with created_by (e.g., admin id=1)
+INSERT INTO courses (title, link, created_by) VALUES
+('Comunicación Efectiva', 'https://curso1.com', 1),
+('Liderazgo para Equipos', 'https://curso2.com', 1),
+('Resolución de Conflictos', 'https://curso3.com', 1);
+
+-- Assign courses to example user (user_id = 3)
+INSERT INTO user_courses (user_id, course_id, progress, status) VALUES
+(3, 1, 75, 'En progreso'),
+(3, 2, 100, 'Completado'),
+(3, 3, 40, 'En progreso');
 
 -- =========================
 -- 4. ÍNDICES PARA RENDIMIENTO

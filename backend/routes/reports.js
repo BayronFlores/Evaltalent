@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/authenticateToken');
+const authenticateToken = require('../middleware/authenticateToken');
 const reportController = require('../controllers/reportController');
 
-router.get('/', auth, reportController.getReports);
-router.get('/types', auth, reportController.getReportTypes);
-router.get('/dashboard', auth, reportController.getDashboard);
-router.post('/', auth, reportController.createReport);
-router.get('/:id/export/pdf', auth, reportController.exportPDF);
-router.get('/:id/export/excel', auth, reportController.exportExcel);
-router.delete('/:id', auth, reportController.deleteReport);
+router.get('/', authenticateToken, reportController.getReports);
+router.get('/types', authenticateToken, reportController.getReportTypes);
+router.get('/dashboard', authenticateToken, reportController.getDashboard);
+router.post('/', authenticateToken, reportController.createReport);
+router.get('/:id/export/pdf', authenticateToken, reportController.exportPDF);
+router.get(
+  '/:id/export/excel',
+  authenticateToken,
+  reportController.exportExcel,
+);
+router.delete('/:id', authenticateToken, reportController.deleteReport);
 
 module.exports = router;
