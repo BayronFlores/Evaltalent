@@ -237,16 +237,17 @@ VALUES
  '[{"nombre_completo":"María García","department":"Development","total_evaluaciones":1,"evaluaciones_pendientes":1}]', 1);
 
 -- Insert example courses with created_by (e.g., admin id=1)
-INSERT INTO courses (title, link, created_by) VALUES
-('Comunicación Efectiva', 'https://curso1.com', 1),
-('Liderazgo para Equipos', 'https://curso2.com', 1),
-('Resolución de Conflictos', 'https://curso3.com', 1);
+INSERT INTO courses (id, title, link, created_by) VALUES
+(1, 'Comunicación Efectiva', 'https://www.gocursos.cl/cursos/trabajo_en_equipo,_comunicacion,_liderazgo,_resolucion_de_conflictos/', 1),
+(2, 'Liderazgo para Equipos', 'https://www.gocursos.cl/cursos/trabajo_en_equipo,_comunicacion,_liderazgo,_resolucion_de_conflictos/', 1),
+(3, 'Resolución de Conflictos', 'https://www.gocursos.cl/cursos/trabajo_en_equipo,_comunicacion,_liderazgo,_resolucion_de_conflictos/', 1),
+(4, 'Trabajo en Equipo', 'https://www.gocursos.cl/cursos/trabajo_en_equipo,_comunicacion,_liderazgo,_resolucion_de_conflictos/', 1);
 
--- Assign courses to example user (user_id = 3)
 INSERT INTO user_courses (user_id, course_id, progress, status) VALUES
 (3, 1, 75, 'En progreso'),
 (3, 2, 100, 'Completado'),
-(3, 3, 40, 'En progreso');
+(3, 3, 40, 'En progreso'),
+(3, 4, 50, 'En progreso');
 
 -- =========================
 -- 4. ÍNDICES PARA RENDIMIENTO

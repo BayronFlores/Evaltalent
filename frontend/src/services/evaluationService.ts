@@ -54,4 +54,14 @@ export const evaluationService = {
       throw new Error(error.message || 'Error al eliminar evaluación');
     }
   },
+  getMyResults: async () => {
+    const response = await fetch(`${API_BASE_URL}/evaluations/my-results`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error fetching evaluations');
+    }
+    return response.json();
+  },
 };

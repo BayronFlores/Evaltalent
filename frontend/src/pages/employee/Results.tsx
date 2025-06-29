@@ -1,70 +1,92 @@
 import { useEffect, useState } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { evaluationService } from '../../services/evaluationService';
 
-interface ResultadoDetalle {
-  skill: string;
+interface ResultadoEvaluacion {
+  id: number;
+  cycle: string;
   score: number;
+  comments: string;
+  submitted_at: string;
+  template: string;
+  responses: { question: string; answer: string }[];
 }
-
-interface ResultadosData {
-  evaluacion: string;
-  fecha: string;
-  puntuacionGlobal: number;
-  detalles: ResultadoDetalle[];
-}
-
-const resultadosMock: ResultadosData = {
-  evaluacion: 'Autoevaluación Q2',
-  fecha: '2025-06-10',
-  puntuacionGlobal: 4.5,
-  detalles: [
-    { skill: 'Liderazgo', score: 4.7 },
-    { skill: 'Comunicación', score: 4.8 },
-    { skill: 'Trabajo en Equipo', score: 4.3 },
-    { skill: 'Resolución de Problemas', score: 4.4 },
-  ],
-};
 
 const Resultados = () => {
-  const [data, setData] = useState<ResultadoDetalle[]>([]);
+  const [evaluaciones, setEvaluaciones] = useState<ResultadoEvaluacion[]>([]);
+  const [selected, setSelected] = useState<ResultadoEvaluacion | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simular carga de datos
-    setData(resultadosMock.detalles);
+    evaluationService
+      .getMyResults()
+      .then((data) => {
+        setEvaluaciones(data);
+        if (data.length > 0) setSelected(data[0]);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <p>Cargando evaluaciones...</p>;
+  if (error) return <p className="text-red-600">Error: {error}</p>;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <h2 className="text-2xl font-semibold">Resultados de Evaluación</h2>
-      <div className="bg-white p-6 rounded shadow">
-        <h3 className="text-xl font-medium mb-2">
-          {resultadosMock.evaluacion}
-        </h3>
-        <p className="mb-4 text-gray-600">Fecha: {resultadosMock.fecha}</p>
-        <p className="text-3xl font-bold text-green-600 mb-6">
-          Puntuación Global: {resultadosMock.puntuacionGlobal.toFixed(1)}
-        </p>
 
-        <h4 className="text-lg font-semibold mb-3">Detalle por Competencia</h4>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart
-            data={data}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      {evaluaciones.length === 0 && <p>No hay evaluaciones disponibles.</p>}
+
+      {evaluaciones.length > 0 && (
+        <>
+          <select
+            className="mb-4 p-2 border rounded"
+            onChange={(e) => {
+              const evalId = Number(e.target.value);
+              const evalSelected =
+                evaluaciones.find((ev) => ev.id === evalId) || null;
+              setSelected(evalSelected);
+            }}
+            value={selected?.id || ''}
           >
-            <XAxis dataKey="skill" />
-            <YAxis domain={[0, 5]} />
-            <Tooltip />
-            <Bar dataKey="score" fill="#0284c7" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+            {evaluaciones.map((ev) => (
+              <option key={ev.id} value={ev.id}>
+                {ev.cycle} - {ev.template} (
+                {new Date(ev.submitted_at).toLocaleDateString()})
+              </option>
+            ))}
+          </select>
+
+          {selected && (
+            <div className="bg-white p-6 rounded shadow">
+              <h3 className="text-xl font-medium mb-2">{selected.template}</h3>
+              <p className="mb-4 text-gray-600">Ciclo: {selected.cycle}</p>
+              <p className="mb-4 text-gray-600">
+                Fecha: {new Date(selected.submitted_at).toLocaleDateString()}
+              </p>
+              <p className="text-3xl font-bold text-green-600 mb-6">
+                Puntuación Global:{' '}
+                {selected.score ? Number(selected.score).toFixed(1) : 'N/A'}
+              </p>
+              <p className="mb-4 italic">Comentarios: {selected.comments}</p>
+
+              <h4 className="text-lg font-semibold mb-3">
+                Detalle por Pregunta
+              </h4>
+              <ul className="list-disc pl-5">
+                {selected.responses.map((resp, idx) => (
+                  <li key={idx}>
+                    <strong>{resp.question}:</strong> {resp.answer}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

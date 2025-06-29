@@ -152,3 +152,28 @@ exports.deleteEvaluation = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+exports.getMyResults = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const query = `
+      SELECT e.id, ec.name AS cycle, e.score, e.comments, e.submitted_at, et.name AS template, e.responses
+      FROM evaluations e
+      JOIN evaluation_cycles ec ON e.cycle_id = ec.id
+      JOIN evaluation_templates et ON e.template_id = et.id
+      WHERE e.evaluatee_id = $1 AND e.status = 'completed'
+      ORDER BY e.submitted_at DESC
+    `;
+    const { rows } = await pool.query(query, [userId]);
+    const results = rows.map((row) => ({
+      ...row,
+      responses:
+        typeof row.responses === 'string'
+          ? JSON.parse(row.responses)
+          : row.responses || [],
+    }));
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching evaluations:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};

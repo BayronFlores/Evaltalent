@@ -22,18 +22,28 @@ router.get(
   checkPermission('evaluations.read'),
   evaluationController.getEvaluations,
 );
+
 router.post(
   '/',
   authenticateToken,
   checkPermission('evaluations.create'),
   evaluationController.createEvaluation,
 );
+
+router.get(
+  '/my-results',
+  authenticateToken,
+  checkPermission('evaluations.read'), // o un permiso más específico si tienes
+  evaluationController.getMyResults,
+);
+
 router.put(
   '/:id',
   authenticateToken,
   checkPermission('evaluations.update'),
   evaluationController.updateEvaluation,
 );
+
 router.delete(
   '/:id',
   authenticateToken,

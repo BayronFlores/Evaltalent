@@ -1,7 +1,28 @@
-import { TrendingUp, CheckCircle, Users, Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Clock, TrendingUp, CheckCircle, Users } from 'lucide-react';
 import StatsCard from '../../components/dashboard/StatsCard';
+import { courseService } from '../../services/courseService'; // Ajusta ruta
+import type { Curso } from '../../services/courseService';
 
 const EmployeeDashboard = () => {
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    courseService
+      .getCourses()
+      .then((data) => {
+        setCursos(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>Cargando progreso...</p>;
+
   return (
     <div className="space-y-6">
       {/* Employee Stats */}
@@ -38,25 +59,20 @@ const EmployeeDashboard = () => {
             Mi Progreso
           </h3>
           <div className="space-y-4">
-            {[
-              { skill: 'Liderazgo', progress: 85 },
-              { skill: 'Comunicación', progress: 92 },
-              { skill: 'Trabajo en Equipo', progress: 78 },
-              { skill: 'Resolución de Problemas', progress: 88 },
-            ].map((item) => (
-              <div key={item.skill}>
+            {cursos.map((curso) => (
+              <div key={curso.id}>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium text-[#334155]">
-                    {item.skill}
+                    {curso.title}
                   </span>
                   <span className="text-sm text-[#64748b]">
-                    {item.progress}%
+                    {curso.progress}%
                   </span>
                 </div>
                 <div className="w-full bg-[#e2e8f0] rounded-full h-2">
                   <div
                     className="bg-[#0284c7] h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${item.progress}%` }}
+                    style={{ width: `${curso.progress}%` }}
                   />
                 </div>
               </div>
