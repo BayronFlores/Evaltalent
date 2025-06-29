@@ -23,7 +23,7 @@ exports.getEvaluations = async (req, res) => {
       query += ` WHERE e.evaluatee_id IN (SELECT id FROM users WHERE manager_id = $1)`;
       params.push(req.user.id);
     } else if (req.user.role === 'employee') {
-      query += ` WHERE e.evaluator_id = $1`;
+      query += ` WHERE e.evaluatee_id = $1`;
       params.push(req.user.id);
     } else {
       // Si hay otros roles, no mostrar evaluaciones
@@ -44,8 +44,16 @@ exports.getEvaluations = async (req, res) => {
 
 exports.createEvaluation = async (req, res) => {
   try {
-    const { cycle_id, template_id, evaluatee_id, responses, score, comments } =
-      req.body;
+    const {
+      cycle_id,
+      template_id,
+      evaluatee_id,
+      responses,
+      score,
+      comments,
+      due_date,
+      objective,
+    } = req.body;
 
     if (req.user.role === 'manager') {
       const teamCheck = await pool.query(
@@ -67,8 +75,8 @@ exports.createEvaluation = async (req, res) => {
 
     const { rows } = await pool.query(
       `
-      INSERT INTO evaluations (cycle_id, template_id, evaluator_id, evaluatee_id, responses, score, comments, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed')
+      INSERT INTO evaluations (cycle_id, template_id, evaluator_id, evaluatee_id, responses, score, comments, status, due_date, objective)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9)
       RETURNING *
       `,
       [
@@ -79,6 +87,8 @@ exports.createEvaluation = async (req, res) => {
         JSON.stringify(responses),
         score,
         comments,
+        due_date,
+        objective,
       ],
     );
 
@@ -107,9 +117,17 @@ exports.updateEvaluation = async (req, res) => {
     }
 
     if (req.user.role === 'employee') {
-      return res
-        .status(403)
-        .json({ message: 'No autorizado para editar evaluaciones' });
+      // Permitir solo si es el evaluatee de esta evaluación
+      const evalCheck = await pool.query(
+        'SELECT * FROM evaluations WHERE id = $1 AND evaluatee_id = $2',
+        [id, req.user.id],
+      );
+      if (evalCheck.rows.length === 0) {
+        return res
+          .status(403)
+          .json({ message: 'No autorizado para editar esta evaluación' });
+      }
+      // Opcional: validar que el status solo pueda cambiar a 'completed' o 'in_progress' según reglas de negocio
     }
 
     const { rows } = await pool.query(
@@ -152,6 +170,68 @@ exports.deleteEvaluation = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+exports.saveEvaluationProgress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { responses, status } = req.body;
+
+    // Validar que status sea 'in_progress' o 'pending' para guardar progreso
+    if (!['in_progress', 'pending'].includes(status)) {
+      return res
+        .status(400)
+        .json({ message: 'Estado inválido para guardar progreso' });
+    }
+
+    // Validar permisos: solo evaluado (empleado) puede guardar su progreso
+    if (req.user.role === 'employee') {
+      const evalCheck = await pool.query(
+        'SELECT * FROM evaluations WHERE id = $1 AND evaluatee_id = $2',
+        [id, req.user.id],
+      );
+      if (evalCheck.rows.length === 0) {
+        return res
+          .status(403)
+          .json({ message: 'No autorizado para guardar esta evaluación' });
+      }
+    } else {
+      // Otros roles no pueden guardar progreso parcial
+      return res
+        .status(403)
+        .json({ message: 'No autorizado para guardar progreso' });
+    }
+
+    // Asegurarse que responses sea un objeto válido
+    let parsedResponses = responses;
+    if (typeof responses === 'string') {
+      try {
+        parsedResponses = JSON.parse(responses);
+      } catch (e) {
+        return res
+          .status(400)
+          .json({ message: 'Formato inválido de respuestas' });
+      }
+    }
+
+    const { rows } = await pool.query(
+      `UPDATE evaluations
+       SET responses = $1, status = $2, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3
+       RETURNING *`,
+      [JSON.stringify(parsedResponses), status, id],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Evaluación no encontrada' });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error saving evaluation progress:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
 exports.getMyResults = async (req, res) => {
   try {
     const userId = req.user.id;

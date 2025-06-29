@@ -1,8 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { evaluationService } from '../../services/evaluationService';
 
+export interface Question {
+  question: string;
+  type: 'yesno' | 'text' | 'rating';
+}
+
 export interface Evaluation {
-  id: string;
+  id: number;
   title: string;
   evaluatorId: string;
   evaluateeId: string;
@@ -15,6 +20,11 @@ export interface Evaluation {
   comments?: string;
   createdAt: string;
   updatedAt: string;
+
+  objective?: string;
+  dueDate?: string;
+  templateQuestions: Question[]; // Quitar opcional para evitar undefined
+  responses: { [key: string]: any }; // Quitar opcional para evitar undefined
 }
 
 interface EvaluationState {
@@ -53,7 +63,8 @@ const evaluationSlice = createSlice({
       .addCase(fetchEvaluations.fulfilled, (state, action) => {
         state.loading = false;
         state.evaluations = action.payload.map((evalItem: any) => ({
-          id: evalItem.id.toString(),
+          id: Number(evalItem.id), // Convertir a number
+          evaluateeId: evalItem.evaluatee_id,
           title: evalItem.template_name || 'Sin título',
           evaluatorName: evalItem.evaluator_name,
           evaluateeName: evalItem.evaluatee_name,
@@ -64,6 +75,14 @@ const evaluationSlice = createSlice({
           comments: evalItem.comments,
           createdAt: evalItem.created_at,
           updatedAt: evalItem.updated_at,
+
+          objective: evalItem.objective || '',
+          dueDate: evalItem.due_date || '',
+          templateQuestions: evalItem.template_questions || [], // Asegurar array
+          responses:
+            typeof evalItem.responses === 'string'
+              ? JSON.parse(evalItem.responses)
+              : evalItem.responses || {}, // Asegurar objeto
         }));
       })
       .addCase(fetchEvaluations.rejected, (state, action) => {

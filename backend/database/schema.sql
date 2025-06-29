@@ -93,7 +93,10 @@ CREATE TABLE evaluations (
     score DECIMAL(5,2),
     comments TEXT,
     submitted_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    due_date DATE,
+    objective TEXT
 );
 
 -- Tabla de reportes
@@ -106,6 +109,16 @@ CREATE TABLE reports (
     generated_by INTEGER REFERENCES users(id),
     file_path VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE evaluation_evidences (
+  id SERIAL PRIMARY KEY,
+  evaluation_id INTEGER REFERENCES evaluations(id),
+  file_name TEXT,
+  file_path TEXT, -- opcional, si quieres guardar ruta o URL
+  file_data BYTEA,
+  uploaded_by INTEGER REFERENCES users(id),
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE courses (
@@ -174,7 +187,7 @@ WHERE name IN (
 );
 INSERT INTO role_permissions (role_id, permission_id) 
 SELECT 3, id FROM permissions 
-WHERE name IN ('evaluations.read', 'dashboard.view');
+WHERE name IN ('evaluations.read', 'dashboard.view','evaluations.update');
 INSERT INTO role_permissions (role_id, permission_id) 
 SELECT 4, id FROM permissions 
 WHERE name IN (

@@ -17,10 +17,10 @@ export interface User {
 }
 
 export interface UserWithPermissions {
-  id: string;
+  id: number;
   nombre: string;
   email: string;
-  rol: RoleWithPermissions;
+  role: RoleWithPermissions;
 }
 
 export const UserRole = {

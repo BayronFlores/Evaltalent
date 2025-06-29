@@ -200,3 +200,59 @@ exports.deleteReport = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+exports.getGlobalReport = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'No autorizado' });
+    }
+
+    const query = `
+      SELECT 
+        ec.name AS cycle,
+        COUNT(e.id) AS total_evaluations,
+        SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) AS completed,
+        AVG(e.score) AS average_score
+      FROM evaluations e
+      JOIN evaluation_cycles ec ON e.cycle_id = ec.id
+      GROUP BY ec.name
+      ORDER BY ec.start_date DESC
+    `;
+
+    const { rows } = await pool.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching global report:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+exports.getManagerReport = async (req, res) => {
+  try {
+    if (req.user.role !== 'manager') {
+      return res.status(403).json({ message: 'No autorizado' });
+    }
+
+    const managerId = req.user.id;
+
+    const query = `
+      SELECT 
+        u.id AS employee_id,
+        u.first_name || ' ' || u.last_name AS employee_name,
+        COUNT(e.id) AS total_evaluations,
+        SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) AS completed,
+        AVG(e.score) AS average_score
+      FROM users u
+      LEFT JOIN evaluations e ON e.evaluatee_id = u.id
+      WHERE u.manager_id = $1
+      GROUP BY u.id, u.first_name, u.last_name
+      ORDER BY u.first_name
+    `;
+
+    const { rows } = await pool.query(query, [managerId]);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching manager report:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};

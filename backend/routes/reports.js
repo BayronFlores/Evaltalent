@@ -14,5 +14,7 @@ router.get(
   reportController.exportExcel,
 );
 router.delete('/:id', authenticateToken, reportController.deleteReport);
+router.get('/global', authenticateToken, reportController.getGlobalReport);
+router.get('/manager', authenticateToken, reportController.getManagerReport);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const evaluationController = require('../controllers/evaluationController');
+const evaluationEvidenceController = require('../controllers/evaluationEvidenceController');
 const authenticateToken = require('../middleware/authenticateToken');
 
 // Middleware para verificar permisos
@@ -41,6 +42,7 @@ router.put(
   '/:id',
   authenticateToken,
   checkPermission('evaluations.update'),
+  evaluationEvidenceController.parseFormData,
   evaluationController.updateEvaluation,
 );
 
@@ -49,6 +51,32 @@ router.delete(
   authenticateToken,
   checkPermission('evaluations.delete'),
   evaluationController.deleteEvaluation,
+);
+
+router.patch(
+  '/:id/progress',
+  authenticateToken,
+  evaluationController.saveEvaluationProgress,
+);
+
+router.post(
+  '/:id/evidences',
+  authenticateToken,
+  evaluationEvidenceController.parseFormData,
+  evaluationEvidenceController.uploadEvidence,
+);
+
+router.put(
+  '/send/:evaluationId',
+  authenticateToken,
+  evaluationEvidenceController.sendEvaluation,
+);
+
+// Descargar archivo evaluación (admin, manager, employee)
+router.get(
+  '/download/:evaluationId',
+  authenticateToken,
+  evaluationEvidenceController.downloadEvaluationFile,
 );
 
 module.exports = router;

@@ -9,6 +9,13 @@ const getAuthHeaders = () => {
   };
 };
 
+const getAuthHeadersWithoutContentType = () => {
+  const token = tokenManager.getToken();
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
 export const evaluationService = {
   getEvaluations: async () => {
     const response = await fetch(`${API_BASE_URL}/evaluations`, {
@@ -54,6 +61,7 @@ export const evaluationService = {
       throw new Error(error.message || 'Error al eliminar evaluación');
     }
   },
+
   getMyResults: async () => {
     const response = await fetch(`${API_BASE_URL}/evaluations/my-results`, {
       method: 'GET',
@@ -61,6 +69,35 @@ export const evaluationService = {
     });
     if (!response.ok) {
       throw new Error('Error fetching evaluations');
+    }
+    return response.json();
+  },
+
+  saveProgress: async (evaluationId: string, formData: FormData) => {
+    const response = await fetch(
+      `${API_BASE_URL}/evaluations/${evaluationId}/progress`,
+      {
+        method: 'PATCH',
+        headers: getAuthHeadersWithoutContentType(), // No Content-Type aquí
+        body: formData,
+      },
+    );
+    if (!response.ok) throw new Error('Error guardando progreso');
+    return response.json();
+  },
+
+  submitEvaluation: async (evaluationId: string, formData: FormData) => {
+    const response = await fetch(
+      `${API_BASE_URL}/evaluations/${evaluationId}`,
+      {
+        method: 'PUT',
+        headers: getAuthHeadersWithoutContentType(), // No Content-Type aquí
+        body: formData,
+      },
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error enviando evaluación');
     }
     return response.json();
   },
