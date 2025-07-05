@@ -12,6 +12,7 @@ import { renderProtectedRoutes } from './components/routing/RouteConfig';
 
 // Import pages
 import LoginPage from './pages/LoginPage';
+import { LandingPage } from './pages/start';
 import NoAutorizado from './pages/NoAutorizado';
 
 // Import layout
@@ -27,6 +28,9 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       <Routes>
+        {/* Ruta raíz que carga LandingPage */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Public Routes */}
         <Route
           path={ROUTES.LOGIN}
@@ -41,7 +45,6 @@ const App: React.FC = () => {
         <Route path={ROUTES.NO_AUTORIZADO} element={<NoAutorizado />} />
 
         {/* Protected Routes con prefijo de rol como ruta padre */}
-
         <Route
           path={`/${userRole}`}
           element={
